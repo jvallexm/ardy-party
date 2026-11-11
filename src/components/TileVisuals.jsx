@@ -1,5 +1,5 @@
-import React from 'react';
-import { formatBonus } from '../lib/display.js';
+import React from "react";
+import { formatBonus } from "../lib/display.js";
 
 /**
  * Renders the inner visual content of a guest tile: ability icon, pop badge, cash badge, and emoji.
@@ -15,7 +15,7 @@ import { formatBonus } from '../lib/display.js';
  * @returns {React.ReactElement} A fragment of badge and emoji spans.
  */
 export default function TileVisuals({ guestType, def, showAbility }) {
-  const isDancer = guestType === 'dancer';
+  const isDancer = guestType === "dancer";
   return (
     <>
       {showAbility && def.abilityIcon && (

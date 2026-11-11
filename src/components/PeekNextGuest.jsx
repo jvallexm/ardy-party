@@ -1,5 +1,5 @@
-import React from 'react';
-import GuestTile from './GuestTile.jsx';
+import React from "react";
+import GuestTile from "./GuestTile.jsx";
 
 /**
  * Inline panel that lets the player preview the next rolodex guest and decide their fate.
@@ -18,13 +18,16 @@ export default function PeekNextGuest({ guest, onChoose }) {
   if (!guest) return null;
   return (
     <div className="dog-reveal window">
-      <div className="window-body" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+      <div
+        className="window-body"
+        style={{ display: "flex", gap: 8, alignItems: "center" }}
+      >
         <span>👁️ Peek:</span>
         <GuestTile guest={guest} />
-        <button type="button" className="btn" onClick={() => onChoose('boot')}>
+        <button type="button" className="btn" onClick={() => onChoose("boot")}>
           [←] Boot
         </button>
-        <button type="button" className="btn" onClick={() => onChoose('keep')}>
+        <button type="button" className="btn" onClick={() => onChoose("keep")}>
           Keep [→]
         </button>
       </div>

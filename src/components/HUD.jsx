@@ -1,5 +1,5 @@
-import React from 'react';
-import { countStars } from '../lib/gameState.js';
+import React from "react";
+import { countStars } from "../lib/gameState.js";
 
 /**
  * Heads-up display showing live game stats and the End Party action.
@@ -23,18 +23,25 @@ export default function HUD({ state, onEndParty, endPartyFocused = false }) {
         <span className="hud-item">Cash: {state.cash}/30</span>
         <span className="hud-item trouble-display">
           {[0, 1, 2].map((i) => (
-            <span key={i} className={`trouble-x${i < state.trouble ? '' : ' off'}`}>❌</span>
+            <span
+              key={i}
+              className={`trouble-x${i < state.trouble ? "" : " off"}`}
+            >
+              ❌
+            </span>
           ))}
         </span>
         <span className="hud-item">Nights: {state.nightsLeft}</span>
         <span className="stars">
           {[0, 1, 2, 3].map((i) => (
-            <span key={i} className={`star${i < stars ? '' : ' off'}`}>⭐</span>
+            <span key={i} className={`star${i < stars ? "" : " off"}`}>
+              ⭐
+            </span>
           ))}
         </span>
         <button
           type="button"
-          className={`btn hud-btn${endPartyFocused ? ' focused' : ''}`}
+          className={`btn hud-btn${endPartyFocused ? " focused" : ""}`}
           onClick={onEndParty}
         >
           End Party

@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
-import { SHOP_GUESTS } from '../lib/guests.js';
-import { confirmDogReveal } from '../lib/gameState.js';
+import { useEffect } from "react";
+import { SHOP_GUESTS } from "../lib/guests.js";
+import { confirmDogReveal } from "../lib/gameState.js";
 
 const COLS = 9;
 
@@ -54,10 +54,10 @@ export default function useKeyboardNav({
 }) {
   useEffect(() => {
     const handleKey = (e) => {
-      if (e.key.startsWith('Arrow')) e.preventDefault();
+      if (e.key.startsWith("Arrow")) e.preventDefault();
 
       if (rolodexOpen) {
-        if (e.key === 'Escape' || e.key === ' ') {
+        if (e.key === "Escape" || e.key === " ") {
           e.preventDefault();
           setRolodexOpen(false);
         }
@@ -66,28 +66,34 @@ export default function useKeyboardNav({
 
       const { phase } = state;
 
-      if (phase === 'summary') {
-        if (e.key === ' ' || e.key === 'Enter') {
+      if (phase === "summary") {
+        if (e.key === " " || e.key === "Enter") {
           e.preventDefault();
           handleConfirmSummary();
         }
         return;
       }
 
-      if (phase === 'dogReveal') {
-        if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') setState(confirmDogReveal(state, 'boot'));
-        if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') setState(confirmDogReveal(state, 'keep'));
+      if (phase === "dogReveal") {
+        if (e.key === "a" || e.key === "A" || e.key === "ArrowLeft")
+          setState(confirmDogReveal(state, "boot"));
+        if (e.key === "d" || e.key === "D" || e.key === "ArrowRight")
+          setState(confirmDogReveal(state, "keep"));
         return;
       }
 
-      if (phase === 'blame') {
+      if (phase === "blame") {
         const max = state.house.length - 1;
         let next = blameCursor;
-        if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') next = Math.max(0, blameCursor - 1);
-        else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') next = Math.min(max, blameCursor + 1);
-        else if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') next = Math.max(0, blameCursor - COLS);
-        else if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') next = Math.min(max, blameCursor + COLS);
-        else if (e.key === ' ') {
+        if (e.key === "a" || e.key === "A" || e.key === "ArrowLeft")
+          next = Math.max(0, blameCursor - 1);
+        else if (e.key === "d" || e.key === "D" || e.key === "ArrowRight")
+          next = Math.min(max, blameCursor + 1);
+        else if (e.key === "w" || e.key === "W" || e.key === "ArrowUp")
+          next = Math.max(0, blameCursor - COLS);
+        else if (e.key === "s" || e.key === "S" || e.key === "ArrowDown")
+          next = Math.min(max, blameCursor + COLS);
+        else if (e.key === " ") {
           e.preventDefault();
           handleBlame(state.house[blameCursor].id);
           return;
@@ -96,16 +102,21 @@ export default function useKeyboardNav({
         return;
       }
 
-      if (phase === 'shop') {
+      if (phase === "shop") {
         const totalItems = SHOP_GUESTS.length + 2;
         let next = shopCursor;
-        if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') next = shopCursor === 0 ? totalItems - 1 : shopCursor - 1;
-        else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') next = Math.min(totalItems - 1, shopCursor + 1);
-        else if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') next = Math.max(0, shopCursor - COLS);
-        else if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') next = Math.min(totalItems - 1, shopCursor + COLS);
-        else if (e.key === ' ') {
+        if (e.key === "a" || e.key === "A" || e.key === "ArrowLeft")
+          next = shopCursor === 0 ? totalItems - 1 : shopCursor - 1;
+        else if (e.key === "d" || e.key === "D" || e.key === "ArrowRight")
+          next = Math.min(totalItems - 1, shopCursor + 1);
+        else if (e.key === "w" || e.key === "W" || e.key === "ArrowUp")
+          next = Math.max(0, shopCursor - COLS);
+        else if (e.key === "s" || e.key === "S" || e.key === "ArrowDown")
+          next = Math.min(totalItems - 1, shopCursor + COLS);
+        else if (e.key === " ") {
           e.preventDefault();
-          if (shopCursor < SHOP_GUESTS.length) handleBuy(SHOP_GUESTS[shopCursor]);
+          if (shopCursor < SHOP_GUESTS.length)
+            handleBuy(SHOP_GUESTS[shopCursor]);
           else if (shopCursor === SHOP_GUESTS.length) handleExpand();
           else handleNext();
           return;
@@ -116,9 +127,9 @@ export default function useKeyboardNav({
 
       // party phase — row -1 means End Party (HUD) is focused
       if (cursor.row === -1) {
-        if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') {
+        if (e.key === "s" || e.key === "S" || e.key === "ArrowDown") {
           setCursor({ row: 0, col: 0 });
-        } else if (e.key === ' ') {
+        } else if (e.key === " ") {
           e.preventDefault();
           handleEndParty();
         }
@@ -130,33 +141,46 @@ export default function useKeyboardNav({
       let { row, col } = cursor;
       let moved = false;
 
-      if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
+      if (e.key === "a" || e.key === "A" || e.key === "ArrowLeft") {
         col--;
-        if (col < 0) { row--; col = COLS - 1; }
+        if (col < 0) {
+          row--;
+          col = COLS - 1;
+        }
         moved = true;
-      } else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') {
+      } else if (e.key === "d" || e.key === "D" || e.key === "ArrowRight") {
         col++;
-        if (col >= COLS) { row++; col = 0; }
+        if (col >= COLS) {
+          row++;
+          col = 0;
+        }
         moved = true;
-      } else if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') {
-        if (row === 0) { setCursor({ row: -1, col: 0 }); return; }
+      } else if (e.key === "w" || e.key === "W" || e.key === "ArrowUp") {
+        if (row === 0) {
+          setCursor({ row: -1, col: 0 });
+          return;
+        }
         row--;
         moved = true;
-      } else if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') {
+      } else if (e.key === "s" || e.key === "S" || e.key === "ArrowDown") {
         row++;
         moved = true;
-      } else if (e.key === ' ') {
+      } else if (e.key === " ") {
         e.preventDefault();
         const tileIdx = cursor.row * COLS + cursor.col;
         if (tileIdx === 0) {
           setRolodexOpen(true);
         } else if (tileIdx === 1) {
-          const avail = state.rolodex.filter((g) => !state.bannedThisParty.includes(g.id));
-          const doorDisabled = avail.length === 0 || state.house.length >= state.houseCapacity;
+          const avail = state.rolodex.filter(
+            (g) => !state.bannedThisParty.includes(g.id),
+          );
+          const doorDisabled =
+            avail.length === 0 || state.house.length >= state.houseCapacity;
           if (!doorDisabled) handleDoor();
         } else {
           const guestIdx = tileIdx - 2;
-          if (guestIdx < state.house.length) handleGuestClick(state.house[guestIdx]);
+          if (guestIdx < state.house.length)
+            handleGuestClick(state.house[guestIdx]);
         }
         return;
       }
@@ -173,7 +197,7 @@ export default function useKeyboardNav({
       }
     };
 
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
   }, [state, cursor, rolodexOpen, blameCursor, shopCursor]); // eslint-disable-line react-hooks/exhaustive-deps
 }

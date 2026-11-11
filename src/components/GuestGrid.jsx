@@ -1,5 +1,5 @@
-import React from 'react';
-import GuestTile from './GuestTile.jsx';
+import React from "react";
+import GuestTile from "./GuestTile.jsx";
 
 /**
  * Renders a flat grid of guest tiles from an array of guest objects.
@@ -14,7 +14,12 @@ import GuestTile from './GuestTile.jsx';
  * @param {function} [props.onGuestClick] - Called with a guest object when its tile is clicked; omit for read-only display.
  * @returns {React.ReactElement} A div containing one GuestTile per guest.
  */
-export default function GuestGrid({ guests, focusedIndex = -1, onGuestClick, inactive = false }) {
+export default function GuestGrid({
+  guests,
+  focusedIndex = -1,
+  onGuestClick,
+  inactive = false,
+}) {
   return (
     <div className="house-grid">
       {guests.map((g, i) => (

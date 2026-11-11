@@ -1,5 +1,5 @@
-import React from 'react';
-import GuestTile from './GuestTile.jsx';
+import React from "react";
+import GuestTile from "./GuestTile.jsx";
 
 /**
  * Renders the party house grid during the main party phase.
@@ -17,7 +17,13 @@ import GuestTile from './GuestTile.jsx';
  * @param {number} [props.focusedTileIndex=-1] - Flat tile index to highlight as keyboard-focused; -1 means no focus.
  * @returns {React.ReactElement} The house grid window.
  */
-export default function House({ state, onOpenRolodex, onDoor, onGuestClick, focusedTileIndex = -1 }) {
+export default function House({
+  state,
+  onOpenRolodex,
+  onDoor,
+  onGuestClick,
+  focusedTileIndex = -1,
+}) {
   const availableRolodex = state.rolodex.filter(
     (g) => !state.bannedThisParty.includes(g.id),
   );
@@ -27,27 +33,29 @@ export default function House({ state, onOpenRolodex, onDoor, onGuestClick, focu
 
   return (
     <div className="window">
-      <div className="title-bar"><span>House</span></div>
+      <div className="title-bar">
+        <span>House</span>
+      </div>
       <div className="window-body">
         <div className="house-grid">
           <button
             type="button"
-            className={`tile${focusedTileIndex === 0 ? ' focused' : ''}`}
+            className={`tile${focusedTileIndex === 0 ? " focused" : ""}`}
             onClick={onOpenRolodex}
           >
             <span style={{ fontSize: 24 }}>📇</span>
-            <span style={{ position: 'absolute', bottom: 2, fontSize: 9 }}>
+            <span style={{ position: "absolute", bottom: 2, fontSize: 9 }}>
               Rolodex
             </span>
           </button>
           <button
             type="button"
-            className={`tile${focusedTileIndex === 1 ? ' focused' : ''}`}
+            className={`tile${focusedTileIndex === 1 ? " focused" : ""}`}
             onClick={onDoor}
             disabled={doorDisabled}
           >
             <span style={{ fontSize: 24 }}>🚪</span>
-            <span style={{ position: 'absolute', bottom: 2, fontSize: 9 }}>
+            <span style={{ position: "absolute", bottom: 2, fontSize: 9 }}>
               Door
             </span>
           </button>
@@ -62,7 +70,7 @@ export default function House({ state, onOpenRolodex, onDoor, onGuestClick, focu
           {Array.from({ length: emptyCount }).map((_, i) => (
             <div
               key={`e${i}`}
-              className={`tile empty${focusedTileIndex === state.house.length + 2 + i ? ' focused' : ''}`}
+              className={`tile empty${focusedTileIndex === state.house.length + 2 + i ? " focused" : ""}`}
             />
           ))}
         </div>

@@ -1,6 +1,6 @@
-import React from 'react';
-import { GUEST_TYPES } from '../lib/guests.js';
-import TileVisuals from './TileVisuals.jsx';
+import React from "react";
+import { GUEST_TYPES } from "../lib/guests.js";
+import TileVisuals from "./TileVisuals.jsx";
 
 /**
  * Renders a single guest as a clickable tile button.
@@ -18,19 +18,29 @@ import TileVisuals from './TileVisuals.jsx';
  * @param {boolean} [props.focused] - When true, applies the focused CSS class for keyboard nav.
  * @returns {React.ReactElement} A button tile representing the guest.
  */
-export default function GuestTile({ guest, onClick, disabled, title, focused, inactive = false }) {
+export default function GuestTile({
+  guest,
+  onClick,
+  disabled,
+  title,
+  focused,
+  inactive = false,
+}) {
   const def = GUEST_TYPES[guest.type];
-  const isDancer = guest.type === 'dancer';
+  const isDancer = guest.type === "dancer";
   const showAbility =
     (def.trouble && def.abilityIcon) ||
-    (def.abilityIcon && def.ability !== 'fullHouseBonus' && def.ability !== 'removeTrouble' && !guest.abilityUsed) ||
+    (def.abilityIcon &&
+      def.ability !== "fullHouseBonus" &&
+      def.ability !== "removeTrouble" &&
+      !guest.abilityUsed) ||
     isDancer ||
-    def.ability === 'removeTrouble';
+    def.ability === "removeTrouble";
 
   return (
     <button
       type="button"
-      className={`tile${focused ? ' focused' : ''}${inactive ? ' inactive' : ''}`}
+      className={`tile${focused ? " focused" : ""}${inactive ? " inactive" : ""}`}
       onClick={onClick ? () => onClick(guest) : undefined}
       disabled={disabled || inactive}
       title={title}

@@ -1,6 +1,6 @@
-import React from 'react';
-import GuestGrid from './GuestGrid.jsx';
-import { BLAME_REASONS } from '../lib/blameReasons.js';
+import React from "react";
+import GuestGrid from "./GuestGrid.jsx";
+import { BLAME_REASONS } from "../lib/blameReasons.js";
 
 /**
  * Modal overlay that prompts the player to select a guest to eject.
@@ -16,12 +16,19 @@ import { BLAME_REASONS } from '../lib/blameReasons.js';
  * @param {number} [props.focusedIndex=-1] - Index into the house array to highlight for keyboard nav.
  * @returns {React.ReactElement} The blame picker modal.
  */
-export default function BlamePicker({ house, onBlame, context, focusedIndex = -1 }) {
+export default function BlamePicker({
+  house,
+  onBlame,
+  context,
+  focusedIndex = -1,
+}) {
   const reason = BLAME_REASONS[context];
   return (
     <div className="modal-backdrop">
       <div className="modal">
-        <div className="title-bar"><span>Who's to blame?</span></div>
+        <div className="title-bar">
+          <span>Who's to blame?</span>
+        </div>
         <div className="window-body">
           <p>{reason}</p>
           <GuestGrid

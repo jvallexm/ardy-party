@@ -11,4 +11,6 @@
  * formatBonus(-1); // => '-1'
  * formatBonus(0);  // => '0'
  */
-export function formatBonus(n) { return n > 0 ? `+${n}` : String(n); }
+export function formatBonus(n) {
+  return n > 0 ? `+${n}` : String(n);
+}

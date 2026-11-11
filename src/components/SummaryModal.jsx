@@ -1,7 +1,7 @@
-import React from 'react';
-import { GUEST_TYPES } from '../lib/guests.js';
-import { scoreHouse } from '../lib/gameState.js';
-import { formatBonus as fmt } from '../lib/display.js';
+import React from "react";
+import { GUEST_TYPES } from "../lib/guests.js";
+import { scoreHouse } from "../lib/gameState.js";
+import { formatBonus as fmt } from "../lib/display.js";
 
 /**
  * Modal overlay showing per-guest and total scoring for the night just ended.
@@ -18,44 +18,66 @@ import { formatBonus as fmt } from '../lib/display.js';
  */
 export default function SummaryModal({ state, onConfirm }) {
   const { pop, cash } = scoreHouse(state.house, state.houseCapacity);
-  const dancerCount = state.house.filter((g) => g.type === 'dancer').length;
+  const dancerCount = state.house.filter((g) => g.type === "dancer").length;
   const dancerDef = GUEST_TYPES.dancer;
   return (
     <div className="modal-backdrop">
       <div className="modal">
-        <div className="title-bar"><span>Night Results</span></div>
+        <div className="title-bar">
+          <span>Night Results</span>
+        </div>
         <div className="window-body">
           <table className="summary-table">
             <tbody>
-              {state.house.filter((g) => g.type !== 'dancer').map((g) => {
-                const def = GUEST_TYPES[g.type];
-                return (
-                  <tr key={g.id}>
-                    <td>{def.emoji}</td>
-                    <td>{def.name}</td>
-                    <td className="summary-pop">{def.popBonus !== 0 ? fmt(def.popBonus) + ' pop' : ''}</td>
-                    <td className="summary-cash">{def.cashBonus !== 0 ? fmt(def.cashBonus) + ' cash' : ''}</td>
-                  </tr>
-                );
-              })}
+              {state.house
+                .filter((g) => g.type !== "dancer")
+                .map((g) => {
+                  const def = GUEST_TYPES[g.type];
+                  return (
+                    <tr key={g.id}>
+                      <td>{def.emoji}</td>
+                      <td>{def.name}</td>
+                      <td className="summary-pop">
+                        {def.popBonus !== 0 ? fmt(def.popBonus) + " pop" : ""}
+                      </td>
+                      <td className="summary-cash">
+                        {def.cashBonus !== 0
+                          ? fmt(def.cashBonus) + " cash"
+                          : ""}
+                      </td>
+                    </tr>
+                  );
+                })}
               {dancerCount > 0 && (
                 <tr>
                   <td>{dancerDef.emoji}</td>
-                  <td>{dancerDef.name} (x{dancerCount})</td>
-                  <td className="summary-pop">{fmt(dancerCount * dancerCount)} pop</td>
+                  <td>
+                    {dancerDef.name} (x{dancerCount})
+                  </td>
+                  <td className="summary-pop">
+                    {fmt(dancerCount * dancerCount)} pop
+                  </td>
                   <td className="summary-cash"></td>
                 </tr>
               )}
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan={2}><strong>Total</strong></td>
-                <td className="summary-pop"><strong>{fmt(pop)} pop</strong></td>
-                <td className="summary-cash"><strong>{fmt(cash)} cash</strong></td>
+                <td colSpan={2}>
+                  <strong>Total</strong>
+                </td>
+                <td className="summary-pop">
+                  <strong>{fmt(pop)} pop</strong>
+                </td>
+                <td className="summary-cash">
+                  <strong>{fmt(cash)} cash</strong>
+                </td>
               </tr>
             </tfoot>
           </table>
-          <button type="button" className="btn" onClick={onConfirm}>Go to Shop</button>
+          <button type="button" className="btn" onClick={onConfirm}>
+            Go to Shop
+          </button>
         </div>
       </div>
     </div>

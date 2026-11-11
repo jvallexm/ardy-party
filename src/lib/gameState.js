@@ -1,4 +1,4 @@
-import { GUEST_TYPES, HOUSE_EXPANSION_COSTS } from './guests.js';
+import { GUEST_TYPES, HOUSE_EXPANSION_COSTS } from "./guests.js";
 
 const MAX_CASH = 30;
 const MAX_POPULARITY = 60;
@@ -24,13 +24,19 @@ function makeGuest(type, id, order) {
  * @param {function} [options.shuffleFn] - Array shuffle function; defaults to Fisher-Yates.
  * @returns {object} The full initial game state.
  */
-export function createInitialState({ idGen = defaultIdGen, shuffleFn = shuffleArray } = {}) {
+export function createInitialState({
+  idGen = defaultIdGen,
+  shuffleFn = shuffleArray,
+} = {}) {
   const rolodex = [];
-  for (let i = 0; i < 4; i++) rolodex.push(makeGuest('oldFriend', idGen(), rolodex.length));
-  for (let i = 0; i < 2; i++) rolodex.push(makeGuest('richPal', idGen(), rolodex.length));
-  for (let i = 0; i < 4; i++) rolodex.push(makeGuest('wildBuddy', idGen(), rolodex.length));
+  for (let i = 0; i < 4; i++)
+    rolodex.push(makeGuest("oldFriend", idGen(), rolodex.length));
+  for (let i = 0; i < 2; i++)
+    rolodex.push(makeGuest("richPal", idGen(), rolodex.length));
+  for (let i = 0; i < 4; i++)
+    rolodex.push(makeGuest("wildBuddy", idGen(), rolodex.length));
   return {
-    phase: 'party',
+    phase: "party",
     nightsLeft: 24,
     cash: 0,
     popularity: 0,
@@ -76,9 +82,9 @@ export function countStars(house) {
  * // => { pop: 9, cash: -1 }
  */
 export function scoreHouse(house, houseCapacity) {
-  const dancerCount = house.filter((g) => g.type === 'dancer').length;
+  const dancerCount = house.filter((g) => g.type === "dancer").length;
   const dancerPop = dancerCount * dancerCount;
-  const comedianCount = house.filter((g) => g.type === 'comedian').length;
+  const comedianCount = house.filter((g) => g.type === "comedian").length;
   const isFull = house.length === houseCapacity;
   const comedianBonus = isFull ? comedianCount * 5 : 0;
 
@@ -86,7 +92,7 @@ export function scoreHouse(house, houseCapacity) {
   let cash = 0;
   for (const g of house) {
     const def = GUEST_TYPES[g.type];
-    if (g.type === 'dancer') {
+    if (g.type === "dancer") {
       // dancer pop already counted
       cash += def.cashBonus;
     } else {
@@ -102,9 +108,7 @@ function clamp(value, min, max) {
 }
 
 function markAbilityUsed(house, guestId) {
-  return house.map((g) =>
-    g.id === guestId ? { ...g, abilityUsed: true } : g,
-  );
+  return house.map((g) => (g.id === guestId ? { ...g, abilityUsed: true } : g));
 }
 
 // Does any guest in house have an unused ability (other than fullHouseBonus, which is passive)?
@@ -112,14 +116,17 @@ function anyUnusedAbilities(house) {
   return house.some((g) => {
     const def = GUEST_TYPES[g.type];
     if (!def.ability) return false;
-    if (def.ability === 'fullHouseBonus') return false;
-    if (def.ability === 'removeTrouble') return false;
+    if (def.ability === "fullHouseBonus") return false;
+    if (def.ability === "removeTrouble") return false;
     return !g.abilityUsed;
   });
 }
 
 function shouldAutoEnd(state) {
-  return state.house.length === state.houseCapacity && !anyUnusedAbilities(state.house);
+  return (
+    state.house.length === state.houseCapacity &&
+    !anyUnusedAbilities(state.house)
+  );
 }
 
 /**
@@ -147,15 +154,18 @@ export function addGuestToParty(state, guestId) {
     next = { ...next, trouble: next.trouble + 1 };
   }
 
-  const hippieCount = (state) => state.house.filter((g) => g.type === 'hippie').length;
+  const hippieCount = (state) =>
+    state.house.filter((g) => g.type === "hippie").length;
 
   if (next.trouble >= TROUBLE_THRESHOLD + hippieCount(next)) {
-    return { ...next, phase: 'blame', blameContext: 'trouble' };
+    return { ...next, phase: "blame", blameContext: "trouble" };
   }
 
   // Mr. Popular ability: auto-invite next unbanned guest
-  if (def.ability === 'autoInvite') {
-    const nextGuest = next.rolodex.find((g) => !next.bannedThisParty.includes(g.id));
+  if (def.ability === "autoInvite") {
+    const nextGuest = next.rolodex.find(
+      (g) => !next.bannedThisParty.includes(g.id),
+    );
     if (nextGuest) {
       const nextDef = GUEST_TYPES[nextGuest.type];
       const afterRolodex = next.rolodex.filter((g) => g.id !== nextGuest.id);
@@ -165,10 +175,10 @@ export function addGuestToParty(state, guestId) {
         next = { ...next, trouble: next.trouble + 1 };
       }
       if (next.trouble >= TROUBLE_THRESHOLD + hippieCount(next)) {
-        return { ...next, phase: 'blame', blameContext: 'trouble' };
+        return { ...next, phase: "blame", blameContext: "trouble" };
       }
       if (next.house.length > next.houseCapacity) {
-        return { ...next, phase: 'blame', blameContext: 'overcapacity' };
+        return { ...next, phase: "blame", blameContext: "overcapacity" };
       }
     }
   }
@@ -186,7 +196,7 @@ export function addGuestToParty(state, guestId) {
  * @returns {object} State with phase set to 'summary'.
  */
 export function endParty(state) {
-  return { ...state, phase: 'summary', driverMode: null };
+  return { ...state, phase: "summary", driverMode: null };
 }
 
 /**
@@ -219,7 +229,7 @@ export function confirmSummary(state) {
     popularity: clamp(state.popularity + pop, 0, MAX_POPULARITY),
     cash: clamp(state.cash + cash, 0, MAX_CASH),
     nightsLeft: state.nightsLeft - 1,
-    phase: 'shop',
+    phase: "shop",
     rolodex: [...state.rolodex, ...state.house],
   };
 }
@@ -242,7 +252,7 @@ export function blameGuest(state, guestId) {
     bannedThisParty: [guestId],
     nightsLeft: state.nightsLeft - 1,
     trouble: 0,
-    phase: 'shop',
+    phase: "shop",
     blameContext: null,
     driverMode: null,
     rolodex: [...state.rolodex, ...nextHouse],
@@ -273,24 +283,26 @@ export function activateAbility(state, guestId) {
   if (!def.ability) return state;
 
   switch (def.ability) {
-    case 'driver': {
+    case "driver": {
       return {
         ...state,
         house: markAbilityUsed(state.house, guestId),
         driverMode: { driverId: guestId },
       };
     }
-    case 'reveal': {
-      const nextGuest = state.rolodex.find((g) => !state.bannedThisParty.includes(g.id));
+    case "reveal": {
+      const nextGuest = state.rolodex.find(
+        (g) => !state.bannedThisParty.includes(g.id),
+      );
       if (!nextGuest) return state;
       return {
         ...state,
         dogRevealGuestId: nextGuest.id,
-        phase: 'dogReveal',
+        phase: "dogReveal",
         house: markAbilityUsed(state.house, guestId),
       };
     }
-    case 'kick': {
+    case "kick": {
       return { ...state, kickMode: { kickerId: guestId } };
     }
     default:
@@ -312,7 +324,9 @@ export function activateAbility(state, guestId) {
 export function kickGuest(state, kickerId, targetId) {
   const target = state.house.find((g) => g.id === targetId);
   const targetIsTrouble = target && GUEST_TYPES[target.type].trouble;
-  const house = markAbilityUsed(state.house, kickerId).filter((g) => g.id !== targetId);
+  const house = markAbilityUsed(state.house, kickerId).filter(
+    (g) => g.id !== targetId,
+  );
   const { kickMode, ...rest } = state;
   return {
     ...rest,
@@ -333,14 +347,15 @@ export function kickGuest(state, kickerId, targetId) {
  */
 export function confirmDogReveal(state, choice) {
   const id = state.dogRevealGuestId;
-  const rolodex = choice === 'boot'
-    ? state.rolodex.filter((g) => g.id !== id)
-    : state.rolodex;
+  const rolodex =
+    choice === "boot"
+      ? state.rolodex.filter((g) => g.id !== id)
+      : state.rolodex;
   return {
     ...state,
     rolodex,
     dogRevealGuestId: null,
-    phase: 'party',
+    phase: "party",
   };
 }
 
@@ -408,7 +423,7 @@ export function startNextParty(state, shuffleFn = shuffleArray) {
   const reset = state.rolodex.map((g) => ({ ...g, abilityUsed: false }));
   return {
     ...state,
-    phase: 'party',
+    phase: "party",
     trouble: 0,
     house: [],
     rolodex: shuffleFn(reset),

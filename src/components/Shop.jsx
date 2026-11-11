@@ -1,6 +1,10 @@
-import React from 'react';
-import { SHOP_GUESTS, GUEST_TYPES, HOUSE_EXPANSION_COSTS } from '../lib/guests.js';
-import TileVisuals from './TileVisuals.jsx';
+import React from "react";
+import {
+  SHOP_GUESTS,
+  GUEST_TYPES,
+  HOUSE_EXPANSION_COSTS,
+} from "../lib/guests.js";
+import TileVisuals from "./TileVisuals.jsx";
 
 const MAX_CAPACITY = 34;
 
@@ -22,7 +26,14 @@ const MAX_CAPACITY = 34;
  * @param {number} [props.focusedIndex=-1] - Flat shop item index to highlight for keyboard nav.
  * @returns {React.ReactElement} The shop window.
  */
-export default function Shop({ state, onBuy, onExpand, onNext, onOpenRolodex, focusedIndex = -1 }) {
+export default function Shop({
+  state,
+  onBuy,
+  onExpand,
+  onNext,
+  onOpenRolodex,
+  focusedIndex = -1,
+}) {
   const expandCost = HOUSE_EXPANSION_COSTS(state.houseCostIndex);
   const expandDisabled =
     state.cash < expandCost || state.houseCapacity >= MAX_CAPACITY;
@@ -43,23 +54,32 @@ export default function Shop({ state, onBuy, onExpand, onNext, onOpenRolodex, fo
             const def = GUEST_TYPES[key];
             const purchased = state.purchasedCounts[key] || 0;
             const isUnlimited = def.maxPurchase === Infinity;
-            const disabled = state.popularity < def.shopCost || purchased >= def.maxPurchase;
+            const disabled =
+              state.popularity < def.shopCost || purchased >= def.maxPurchase;
             return (
               <div key={key} className="shop-item">
-                {def.description && <span className="shop-tooltip">{def.description}</span>}
+                {def.description && (
+                  <span className="shop-tooltip">{def.description}</span>
+                )}
                 <button
                   type="button"
                   aria-label={def.name}
-                  className={`shop-tile${focusedIndex === i ? ' focused' : ''}`}
+                  className={`shop-tile${focusedIndex === i ? " focused" : ""}`}
                   onClick={() => onBuy(key)}
                   disabled={disabled}
                 >
-                  <TileVisuals guestType={key} def={def} showAbility={!!def.abilityIcon} />
+                  <TileVisuals
+                    guestType={key}
+                    def={def}
+                    showAbility={!!def.abilityIcon}
+                  />
                 </button>
                 <div className="shop-tile-info">
                   <div className="shop-tile-name">{def.name}</div>
                   <div className="shop-tile-cost">{def.shopCost} pop</div>
-                  <div className="shop-tile-count">{isUnlimited ? '∞' : `${purchased}/${def.maxPurchase}`}</div>
+                  <div className="shop-tile-count">
+                    {isUnlimited ? "∞" : `${purchased}/${def.maxPurchase}`}
+                  </div>
                 </div>
               </div>
             );
@@ -68,14 +88,16 @@ export default function Shop({ state, onBuy, onExpand, onNext, onOpenRolodex, fo
             <button
               type="button"
               aria-label={`Expand House ($${expandCost} cash)`}
-              className={`shop-tile${focusedIndex === SHOP_GUESTS.length ? ' focused' : ''}`}
+              className={`shop-tile${focusedIndex === SHOP_GUESTS.length ? " focused" : ""}`}
               onClick={onExpand}
               disabled={expandDisabled}
             >
               🏠
             </button>
             <div className="shop-tile-info">
-              <div className="shop-tile-name">Capacity: {state.houseCapacity}</div>
+              <div className="shop-tile-name">
+                Capacity: {state.houseCapacity}
+              </div>
               <div className="shop-tile-cost">${expandCost} cash</div>
             </div>
           </div>
@@ -89,21 +111,25 @@ export default function Shop({ state, onBuy, onExpand, onNext, onOpenRolodex, fo
               📒
             </button>
             <div className="shop-tile-info">
-              <div className="shop-tile-name">Rolodex: {state.rolodex.length}</div>
+              <div className="shop-tile-name">
+                Rolodex: {state.rolodex.length}
+              </div>
             </div>
           </div>
           <div className="shop-item">
             <button
               type="button"
-              aria-label={isGameOver ? 'Game Over' : 'Start Next Party'}
-              className={`shop-tile${focusedIndex === SHOP_GUESTS.length + 1 ? ' focused' : ''}`}
+              aria-label={isGameOver ? "Game Over" : "Start Next Party"}
+              className={`shop-tile${focusedIndex === SHOP_GUESTS.length + 1 ? " focused" : ""}`}
               onClick={onNext}
               disabled={isGameOver}
             >
               🎉
             </button>
             <div className="shop-tile-info">
-              <div className="shop-tile-name">{isGameOver ? 'Game Over' : 'Start Next Party'}</div>
+              <div className="shop-tile-name">
+                {isGameOver ? "Game Over" : "Start Next Party"}
+              </div>
             </div>
           </div>
         </div>
