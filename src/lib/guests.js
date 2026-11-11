@@ -13,6 +13,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 2,
     maxPurchase: 4,
+    description: null,
   },
   wildBuddy: {
     name: 'Wild Buddy',
@@ -25,6 +26,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: null,
     maxPurchase: 4,
+    description: null,
   },
   richPal: {
     name: 'Rich Pal',
@@ -37,6 +39,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 3,
     maxPurchase: 4,
+    description: null,
   },
   driver: {
     name: 'Driver',
@@ -49,6 +52,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 3,
     maxPurchase: 4,
+    description: 'Click to open your rolodex and directly invite any guest of your choice',
   },
   monkey: {
     name: 'Monkey',
@@ -61,6 +65,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 4,
     maxPurchase: 4,
+    description: null
   },
   securityGuard: {
     name: 'Security Guard',
@@ -73,6 +78,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 4,
     maxPurchase: 4,
+    description: 'Click to remove any guest from the party',
   },
   ticketTaker: {
     name: 'Ticket Taker',
@@ -85,6 +91,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 4,
     maxPurchase: 4,
+    description: null,
   },
   dog: {
     name: 'Dog',
@@ -97,6 +104,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 4,
     maxPurchase: 4,
+    description: 'Click to preview the next guest in your rolodex — you can keep them or permanently remove them from your roster.',
   },
   hippie: {
     name: 'Hippie',
@@ -109,6 +117,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 4,
     maxPurchase: 4,
+    description: '+1 popularity. Automatically reduces trouble by 1 when they arrive.',
   },
   auctioneer: {
     name: 'Auctioneer',
@@ -121,6 +130,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 9,
     maxPurchase: 4,
+    description: null,
   },
   rockStar: {
     name: 'Rock Star',
@@ -133,6 +143,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 5,
     maxPurchase: 4,
+    description: '+2 cash but adds 1 trouble.',
   },
   comedian: {
     name: 'Comedian',
@@ -145,6 +156,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 5,
     maxPurchase: 4,
+    description: '+5 popularity at end of night when there is a full house.',
   },
   caterer: {
     name: 'Caterer',
@@ -157,6 +169,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 5,
     maxPurchase: 4,
+    description: null,
   },
   mrPopular: {
     name: 'Mr. Popular',
@@ -169,6 +182,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 5,
     maxPurchase: 4,
+    description: 'When this guest enters the party, one additional guest is automatically invited from your rolodex.',
   },
   dancer: {
     name: 'Dancer',
@@ -181,6 +195,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 7,
     maxPurchase: 4,
+    description: 'Popularity scales as dancer count squared: 1 dancer = +1, 2 = +4, 3 = +9, 4 = +16.',
   },
   alien: {
     name: 'Alien',
@@ -193,6 +208,7 @@ export const GUEST_TYPES = {
     hasStar: true,
     shopCost: 40,
     maxPurchase: Infinity,
+    description: null,
   },
 };
 

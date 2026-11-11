@@ -17,16 +17,17 @@ const byOrder = (a, b) => a.order - b.order;
  * @param {function} props.onClose - Called when the close button is clicked or Escape/Space is pressed.
  * @returns {React.ReactElement | null} The rolodex modal, or null when closed.
  */
-export default function RolodexModal({ open, rolodex, houseGuests = [], onClose }) {
+export default function RolodexModal({ open, rolodex, houseGuests = [], onClose, onGuestPick }) {
   if (!open) return null;
   const total = rolodex.length + houseGuests.length;
   const sorted = [...rolodex].sort(byOrder);
   const sortedHouse = [...houseGuests].sort(byOrder);
+  const title = onGuestPick ? 'Pick a Guest to Invite' : 'Rolodex';
   return (
     <div className="modal-backdrop">
       <div className="modal">
         <div className="title-bar">
-          <span>Rolodex</span>
+          <span>{title}</span>
           <button
             type="button"
             className="close-btn"
@@ -38,7 +39,7 @@ export default function RolodexModal({ open, rolodex, houseGuests = [], onClose 
         </div>
         <div className="window-body">
           <p>{total} guest{total === 1 ? '' : 's'}{houseGuests.length > 0 ? ` (${houseGuests.length} at party)` : ''}</p>
-          <GuestGrid guests={sorted} />
+          <GuestGrid guests={sorted} onGuestClick={onGuestPick} />
           {sortedHouse.length > 0 && (
             <>
               <hr className="rolodex-separator" />

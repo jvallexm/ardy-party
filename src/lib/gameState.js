@@ -113,6 +113,7 @@ function anyUnusedAbilities(house) {
     const def = GUEST_TYPES[g.type];
     if (!def.ability) return false;
     if (def.ability === 'fullHouseBonus') return false;
+    if (def.ability === 'removeTrouble') return false;
     return !g.abilityUsed;
   });
 }
@@ -146,7 +147,9 @@ export function addGuestToParty(state, guestId) {
     next = { ...next, trouble: next.trouble + 1 };
   }
 
-  if (next.trouble >= TROUBLE_THRESHOLD) {
+  const hippieCount = (state) => state.house.filter((g) => g.type === 'hippie').length;
+
+  if (next.trouble >= TROUBLE_THRESHOLD + hippieCount(next)) {
     return { ...next, phase: 'blame', blameContext: 'trouble' };
   }
 
@@ -161,7 +164,7 @@ export function addGuestToParty(state, guestId) {
       if (nextDef.trouble) {
         next = { ...next, trouble: next.trouble + 1 };
       }
-      if (next.trouble >= TROUBLE_THRESHOLD) {
+      if (next.trouble >= TROUBLE_THRESHOLD + hippieCount(next)) {
         return { ...next, phase: 'blame', blameContext: 'trouble' };
       }
       if (next.house.length > next.houseCapacity) {
@@ -183,7 +186,22 @@ export function addGuestToParty(state, guestId) {
  * @returns {object} State with phase set to 'summary'.
  */
 export function endParty(state) {
-  return { ...state, phase: 'summary' };
+  return { ...state, phase: 'summary', driverMode: null };
+}
+
+/**
+ * Completes a driver ability pick by inviting the chosen rolodex guest.
+ *
+ * Clears driverMode and delegates to addGuestToParty, so trouble and auto-invite
+ * logic applies normally. Returns state unchanged if the target is banned or absent.
+ *
+ * @param {object} state - Current game state; must have driverMode set.
+ * @param {string} targetGuestId - ID of the rolodex guest to invite.
+ * @returns {object} Updated state with the chosen guest added to the house.
+ */
+export function driverPickGuest(state, targetGuestId) {
+  if (state.bannedThisParty.includes(targetGuestId)) return state;
+  return addGuestToParty({ ...state, driverMode: null }, targetGuestId);
 }
 
 /**
@@ -226,6 +244,7 @@ export function blameGuest(state, guestId) {
     trouble: 0,
     phase: 'shop',
     blameContext: null,
+    driverMode: null,
     rolodex: [...state.rolodex, ...nextHouse],
   };
 }
@@ -255,22 +274,10 @@ export function activateAbility(state, guestId) {
 
   switch (def.ability) {
     case 'driver': {
-      const nextGuest = state.rolodex.find((g) => !state.bannedThisParty.includes(g.id));
-      const house = markAbilityUsed(state.house, guestId);
-      if (!nextGuest) {
-        return { ...state, house };
-      }
       return {
         ...state,
-        house: [...house, nextGuest],
-        rolodex: state.rolodex.filter((g) => g.id !== nextGuest.id),
-      };
-    }
-    case 'removeTrouble': {
-      return {
-        ...state,
-        trouble: Math.max(0, state.trouble - 1),
         house: markAbilityUsed(state.house, guestId),
+        driverMode: { driverId: guestId },
       };
     }
     case 'reveal': {

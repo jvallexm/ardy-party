@@ -46,6 +46,7 @@ export default function Shop({ state, onBuy, onExpand, onNext, onOpenRolodex, fo
             const disabled = state.popularity < def.shopCost || purchased >= def.maxPurchase;
             return (
               <div key={key} className="shop-item">
+                {def.description && <span className="shop-tooltip">{def.description}</span>}
                 <button
                   type="button"
                   aria-label={def.name}

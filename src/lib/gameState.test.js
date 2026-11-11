@@ -13,6 +13,7 @@ import {
   startNextParty,
   countStars,
   scoreHouse,
+  driverPickGuest,
 } from './gameState.js';
 import { GUEST_TYPES } from './guests.js';
 
@@ -332,64 +333,71 @@ describe('blameGuest', () => {
 });
 
 describe('activateAbility', () => {
-  it('driver adds next unbanned rolodex guest to house and marks ability used', () => {
-    const idGen = makeIdGen();
-    const base = createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a });
-    const driver = { id: idGen(), type: 'driver', abilityUsed: false };
-    const next1 = { id: idGen(), type: 'oldFriend', abilityUsed: false };
-    const state = {
-      ...base,
-      house: [driver],
-      rolodex: [next1],
-      bannedThisParty: [],
-    };
-    const result = activateAbility(state, driver.id);
-    expect(result.house).toHaveLength(2);
-    expect(result.house[1].id).toBe(next1.id);
-    expect(result.house[0].abilityUsed).toBe(true);
-    expect(result.rolodex).toHaveLength(0);
-  });
-
-  it('driver does nothing special when rolodex empty but still marks used', () => {
+  it('driver sets driverMode and marks ability used', () => {
     const base = createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a });
     const driver = { id: 'd1', type: 'driver', abilityUsed: false };
     const state = { ...base, house: [driver], rolodex: [] };
     const result = activateAbility(state, driver.id);
     expect(result.house[0].abilityUsed).toBe(true);
+    expect(result.driverMode).toEqual({ driverId: 'd1' });
     expect(result.house).toHaveLength(1);
   });
 
-  it('driver skips banned guests', () => {
+  it('driverPickGuest invites any chosen rolodex guest', () => {
     const base = createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a });
-    const driver = { id: 'd1', type: 'driver', abilityUsed: false };
-    const banned = { id: 'b1', type: 'oldFriend', abilityUsed: false };
-    const good = { id: 'g1', type: 'oldFriend', abilityUsed: false };
+    const driver = { id: 'd1', type: 'driver', abilityUsed: true };
+    const target = { id: 'g1', type: 'oldFriend', abilityUsed: false, order: 0 };
+    const other = { id: 'g2', type: 'richPal', abilityUsed: false, order: 1 };
     const state = {
       ...base,
       house: [driver],
-      rolodex: [banned, good],
-      bannedThisParty: ['b1'],
+      rolodex: [other, target],
+      bannedThisParty: [],
+      driverMode: { driverId: 'd1' },
+      houseCapacity: 5,
     };
-    const result = activateAbility(state, driver.id);
-    expect(result.house[1].id).toBe('g1');
-    expect(result.rolodex.map((g) => g.id)).toEqual(['b1']);
+    const result = driverPickGuest(state, 'g1');
+    expect(result.house.map((g) => g.id)).toContain('g1');
+    expect(result.rolodex.map((g) => g.id)).not.toContain('g1');
+    expect(result.driverMode).toBeNull();
   });
 
-  it('hippie reduces trouble and marks ability used', () => {
+  it('driverPickGuest ignores banned guests', () => {
     const base = createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a });
-    const hippie = { id: 'h1', type: 'hippie', abilityUsed: false };
-    const state = { ...base, house: [hippie], trouble: 2 };
-    const result = activateAbility(state, hippie.id);
+    const state = { ...base, driverMode: { driverId: 'd1' }, bannedThisParty: ['b1'] };
+    const result = driverPickGuest(state, 'b1');
+    expect(result).toBe(state);
+  });
+
+  it('hippie passively reduces trouble by 1 when added to party', () => {
+    const base = createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a });
+    const hippie = { id: 'h1', type: 'hippie', abilityUsed: false, order: 0 };
+    const state = { ...base, house: [], rolodex: [hippie], trouble: 2, houseCapacity: 5 };
+    const result = addGuestToParty(state, 'h1');
     expect(result.trouble).toBe(1);
-    expect(result.house[0].abilityUsed).toBe(true);
   });
 
-  it('hippie trouble floors at 0', () => {
+  it('hippie trouble floors at 0 on arrival', () => {
     const base = createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a });
-    const hippie = { id: 'h1', type: 'hippie', abilityUsed: false };
-    const state = { ...base, house: [hippie], trouble: 0 };
-    const result = activateAbility(state, hippie.id);
+    const hippie = { id: 'h1', type: 'hippie', abilityUsed: false, order: 0 };
+    const state = { ...base, house: [], rolodex: [hippie], trouble: 0, houseCapacity: 5 };
+    const result = addGuestToParty(state, 'h1');
     expect(result.trouble).toBe(0);
+  });
+
+  it('hippie filling last house slot auto-ends the party', () => {
+    const base = createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a });
+    const hippie = { id: 'h1', type: 'hippie', abilityUsed: false, order: 0 };
+    const state = {
+      ...base,
+      house: [{ id: 'o1', type: 'oldFriend', abilityUsed: false, order: 1 }],
+      rolodex: [hippie],
+      houseCapacity: 2,
+      trouble: 0,
+      bannedThisParty: [],
+    };
+    const result = addGuestToParty(state, 'h1');
+    expect(result.phase).toBe('summary');
   });
 
   it('dog sets dogRevealGuestId to next rolodex id and phase', () => {

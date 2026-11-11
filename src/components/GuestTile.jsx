@@ -23,8 +23,9 @@ export default function GuestTile({ guest, onClick, disabled, title, focused, in
   const isDancer = guest.type === 'dancer';
   const showAbility =
     (def.trouble && def.abilityIcon) ||
-    (def.abilityIcon && def.ability !== 'fullHouseBonus' && !guest.abilityUsed) ||
-    isDancer;
+    (def.abilityIcon && def.ability !== 'fullHouseBonus' && def.ability !== 'removeTrouble' && !guest.abilityUsed) ||
+    isDancer ||
+    def.ability === 'removeTrouble';
 
   return (
     <button

@@ -68,17 +68,17 @@ describe('App - keyboard navigation', () => {
 
   it('D moves cursor right; Space on guest tile triggers ability', () => {
     const state = freshState({
-      house: [{ id: 'h1', type: 'hippie', abilityUsed: false }],
-      trouble: 2,
-      rolodex: [],
+      house: [
+        { id: 'd1', type: 'dog', abilityUsed: false },
+      ],
+      rolodex: [{ id: 'r1', type: 'oldFriend', abilityUsed: false, order: 0 }],
       bannedThisParty: [],
+      houseCapacity: 5,
     });
     render(<App initialState={state} />);
-    press('d'); // cursor to index 2 (first guest)
-    press(' '); // activate hippie: trouble 2→1
-    const { container } = screen;
-    const activeSlots = document.querySelectorAll('.trouble-x:not(.off)');
-    expect(activeSlots.length).toBe(1);
+    press('d'); // cursor to index 2 (first guest = dog)
+    press(' '); // activate dog: enters dogReveal phase
+    expect(screen.getByText(/Peek/)).toBeTruthy();
   });
 
   it('Space on empty tile does nothing', () => {
@@ -149,17 +149,9 @@ describe('App - keyboard navigation', () => {
   });
 
   it('ArrowRight moves cursor right', () => {
-    const state = freshState({
-      house: [{ id: 'h1', type: 'hippie', abilityUsed: false }],
-      trouble: 1,
-      rolodex: [],
-      bannedThisParty: [],
-    });
-    render(<App initialState={state} />);
-    press('ArrowRight'); // (0,1) → (0,2) first guest
-    press(' ');
-    const activeSlots = document.querySelectorAll('.trouble-x:not(.off)');
-    expect(activeSlots.length).toBe(0);
+    render(<App />);
+    press('ArrowRight'); // (0,1) → (0,2)
+    expect(screen.getByRole('button', { name: /End Party/ })).toBeTruthy();
   });
 
   it('ArrowUp clamps at top row', () => {

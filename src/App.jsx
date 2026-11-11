@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import usePhaseReset from './hooks/usePhaseReset.js';
 import useKeyboardNav from './hooks/useKeyboardNav.js';
 import HUD from './components/HUD.jsx';
@@ -21,6 +21,7 @@ import {
   purchaseGuest,
   expandHouse,
   startNextParty,
+  driverPickGuest,
 } from './lib/gameState.js';
 
 const COLS = 9;
@@ -68,6 +69,10 @@ export default function App({ initialState, initialCursor } = {}) {
     }
   };
 
+  useEffect(() => {
+    if (state.driverMode) setRolodexOpen(true);
+  }, [state.driverMode]);
+
   const handleEndParty = () => setState(endParty(state));
   const handleConfirmSummary = () => setState(confirmSummary(state));
   const handleBlame = (id) => setState(blameGuest(state, id));
@@ -75,6 +80,14 @@ export default function App({ initialState, initialCursor } = {}) {
   const handleBuy = (type) => setState(purchaseGuest(state, type));
   const handleExpand = () => setState(expandHouse(state));
   const handleNext = () => setState(startNextParty(state));
+  const handleDriverPick = (guest) => {
+    setState(driverPickGuest(state, guest.id));
+    setRolodexOpen(false);
+  };
+  const handleRolodexClose = () => {
+    if (state.driverMode) setState((s) => ({ ...s, driverMode: null }));
+    setRolodexOpen(false);
+  };
 
   useKeyboardNav({
     state,
@@ -154,11 +167,17 @@ export default function App({ initialState, initialCursor } = {}) {
         {state.kickMode && (
           <p>Click a guest to kick them out.</p>
         )}
+        {state.driverMode && !rolodexOpen && (
+          <p>Driver: open your rolodex to pick any guest to invite.</p>
+        )}
         <RolodexModal
           open={rolodexOpen}
-          rolodex={state.rolodex}
-          houseGuests={state.house}
-          onClose={() => setRolodexOpen(false)}
+          rolodex={state.driverMode
+            ? state.rolodex.filter((g) => !state.bannedThisParty.includes(g.id))
+            : state.rolodex}
+          houseGuests={state.driverMode ? [] : state.house}
+          onClose={handleRolodexClose}
+          onGuestPick={state.driverMode ? handleDriverPick : undefined}
         />
         {state.phase === 'dogReveal' && (
           <PeekNextGuest guest={revealedGuest} onChoose={handleDog} />

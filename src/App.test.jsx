@@ -108,18 +108,33 @@ describe('App - ability and blame integration', () => {
     expect(screen.getByText(/Shop/)).toBeTruthy();
   });
 
-  it('driver ability activates and pulls next guest from rolodex', () => {
+  it('driver ability opens rolodex pick mode and invites chosen guest', () => {
     const state = freshState({
       house: [{ id: 'd1', type: 'driver', abilityUsed: false }],
-      rolodex: [{ id: 'f1', type: 'oldFriend', abilityUsed: false }],
+      rolodex: [{ id: 'f1', type: 'oldFriend', abilityUsed: false, order: 0 }],
       houseCapacity: 5,
+      bannedThisParty: [],
     });
     render(<App initialState={state} />);
-    // Click the driver tile to activate
-    const driverTile = screen.getByText('🚗').closest('button');
-    fireEvent.click(driverTile);
-    // oldFriend is now in house
+    fireEvent.click(screen.getByText('🚗').closest('button'));
+    expect(screen.getByText(/Pick a Guest to Invite/)).toBeTruthy();
+    fireEvent.click(screen.getByText('🧑').closest('button'));
+    expect(screen.queryByText(/Pick a Guest to Invite/)).toBeNull();
     expect(screen.getByText('🧑')).toBeTruthy();
+  });
+
+  it('closing rolodex while in driver mode cancels driver mode', () => {
+    const state = freshState({
+      house: [{ id: 'd1', type: 'driver', abilityUsed: false }],
+      rolodex: [{ id: 'f1', type: 'oldFriend', abilityUsed: false, order: 0 }],
+      houseCapacity: 5,
+      bannedThisParty: [],
+    });
+    render(<App initialState={state} />);
+    fireEvent.click(screen.getByText('🚗').closest('button'));
+    expect(screen.getByText(/Pick a Guest to Invite/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /close/i }));
+    expect(screen.queryByText(/Pick a Guest to Invite/)).toBeNull();
   });
 
   it('security guard sets kickMode and clicking a target kicks them', () => {
