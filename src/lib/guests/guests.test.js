@@ -4,7 +4,7 @@ import {
   SHOP_GUESTS,
   HOUSE_EXPANSION_COSTS,
   buildTestShop,
-} from "./guests.js";
+} from "./index.js";
 
 describe("GUEST_TYPES", () => {
   it("defines oldFriend", () => {
@@ -121,6 +121,105 @@ describe("GUEST_TYPES", () => {
     const g = GUEST_TYPES.alien;
     expect(g.hasStar).toBe(true);
     expect(g.shopCost).toBe(40);
+    expect(g.maxPurchase).toBe(Infinity);
+  });
+
+  // Scenario 2 guests
+  it("defines privateEye with driver ability", () => {
+    const g = GUEST_TYPES.privateEye;
+    expect(g.popBonus).toBe(2);
+    expect(g.cashBonus).toBe(-1);
+    expect(g.ability).toBe("driver");
+    expect(g.shopCost).toBe(4);
+    expect(g.hasStar).toBe(false);
+  });
+
+  it("defines introvert with passive scoring", () => {
+    const g = GUEST_TYPES.introvert;
+    expect(g.popBonus).toBe(1);
+    expect(g.cashBonus).toBe(0);
+    expect(g.ability).toBeNull();
+    expect(g.shopCost).toBe(4);
+  });
+
+  it("defines grillmaster with refresh ability", () => {
+    const g = GUEST_TYPES.grillmaster;
+    expect(g.popBonus).toBe(2);
+    expect(g.ability).toBe("refresh");
+    expect(g.shopCost).toBe(5);
+  });
+
+  it("defines mascot with passive scoring", () => {
+    const g = GUEST_TYPES.mascot;
+    expect(g.popBonus).toBe(1);
+    expect(g.ability).toBeNull();
+    expect(g.shopCost).toBe(5);
+  });
+
+  it("defines gangster with trouble and cash bonus", () => {
+    const g = GUEST_TYPES.gangster;
+    expect(g.cashBonus).toBe(4);
+    expect(g.popBonus).toBe(0);
+    expect(g.trouble).toBe(true);
+    expect(g.shopCost).toBe(6);
+  });
+
+  it("defines cuteDog with removeTrouble ability", () => {
+    const g = GUEST_TYPES.cuteDog;
+    expect(g.popBonus).toBe(2);
+    expect(g.ability).toBe("removeTrouble");
+    expect(g.shopCost).toBe(7);
+  });
+
+  it("defines gambler with trouble and cash bonus", () => {
+    const g = GUEST_TYPES.gambler;
+    expect(g.popBonus).toBe(2);
+    expect(g.cashBonus).toBe(3);
+    expect(g.trouble).toBe(true);
+    expect(g.shopCost).toBe(7);
+  });
+
+  it("defines spy with reveal ability", () => {
+    const g = GUEST_TYPES.spy;
+    expect(g.cashBonus).toBe(2);
+    expect(g.ability).toBe("reveal");
+    expect(g.shopCost).toBe(8);
+  });
+
+  it("defines writer with passive scoring", () => {
+    const g = GUEST_TYPES.writer;
+    expect(g.popBonus).toBe(1);
+    expect(g.ability).toBeNull();
+    expect(g.shopCost).toBe(8);
+  });
+
+  it("defines wrestler with kick ability", () => {
+    const g = GUEST_TYPES.wrestler;
+    expect(g.popBonus).toBe(2);
+    expect(g.ability).toBe("kick");
+    expect(g.shopCost).toBe(8);
+  });
+
+  it("defines climber with no ability and passive arrival bonus", () => {
+    const g = GUEST_TYPES.climber;
+    expect(g.popBonus).toBe(0);
+    expect(g.ability).toBeNull();
+    expect(g.shopCost).toBe(12);
+  });
+
+  it("defines mermaid with star and autoInvite ability", () => {
+    const g = GUEST_TYPES.mermaid;
+    expect(g.hasStar).toBe(true);
+    expect(g.ability).toBe("autoInvite");
+    expect(g.shopCost).toBe(35);
+    expect(g.maxPurchase).toBe(Infinity);
+  });
+
+  it("defines superhero with star", () => {
+    const g = GUEST_TYPES.superhero;
+    expect(g.hasStar).toBe(true);
+    expect(g.popBonus).toBe(3);
+    expect(g.shopCost).toBe(50);
     expect(g.maxPurchase).toBe(Infinity);
   });
 });
@@ -243,6 +342,69 @@ describe("buildTestShop", () => {
     const shop = buildTestShop(identityShuffle, purchasedCounts);
     expect(shop).not.toContain("oldFriend");
     expect(shop.filter((k) => k === null).length).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe("buildTestShop scenario 2", () => {
+  const identityShuffle = (a) => a;
+
+  it("contains exactly 9 entries", () => {
+    const shop = buildTestShop(identityShuffle, {}, "s2");
+    expect(shop.length).toBe(9);
+  });
+
+  it("always includes oldFriend and richPal", () => {
+    const shop = buildTestShop(identityShuffle, {}, "s2");
+    expect(shop).toContain("oldFriend");
+    expect(shop).toContain("richPal");
+  });
+
+  it("does NOT include alien", () => {
+    const shop = buildTestShop(identityShuffle, {}, "s2");
+    expect(shop).not.toContain("alien");
+  });
+
+  it("picks 1 from star pool (mermaid or superhero)", () => {
+    const shop = buildTestShop(identityShuffle, {}, "s2");
+    const starGuests = shop.filter((k) => k === "mermaid" || k === "superhero");
+    expect(starGuests.length).toBe(1);
+  });
+
+  it("picks 3 from pool A", () => {
+    const poolA = ["privateEye", "introvert", "gambler", "mascot", "gangster"];
+    const shop = buildTestShop(identityShuffle, {}, "s2");
+    const fromA = shop.filter((k) => poolA.includes(k));
+    expect(fromA.length).toBe(3);
+  });
+
+  it("picks 2 from pool B", () => {
+    const poolB = ["writer", "grillmaster", "cuteDog", "spy"];
+    const shop = buildTestShop(identityShuffle, {}, "s2");
+    const fromB = shop.filter((k) => poolB.includes(k));
+    expect(fromB.length).toBe(2);
+  });
+
+  it("picks 1 from pool C", () => {
+    const poolC = ["climber", "wrestler"];
+    const shop = buildTestShop(identityShuffle, {}, "s2");
+    const fromC = shop.filter((k) => poolC.includes(k));
+    expect(fromC.length).toBe(1);
+  });
+
+  it("contains no duplicates", () => {
+    const shop = buildTestShop(identityShuffle, {}, "s2");
+    expect(new Set(shop).size).toBe(shop.length);
+  });
+
+  it("is sorted by shopCost ascending", () => {
+    const shop = buildTestShop(identityShuffle, {}, "s2");
+    for (let i = 1; i < shop.length; i++) {
+      if (shop[i] && shop[i - 1]) {
+        expect(GUEST_TYPES[shop[i]].shopCost).toBeGreaterThanOrEqual(
+          GUEST_TYPES[shop[i - 1]].shopCost,
+        );
+      }
+    }
   });
 });
 

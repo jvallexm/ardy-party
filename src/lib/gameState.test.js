@@ -83,6 +83,43 @@ describe("createInitialState", () => {
     expect(state.testShop).not.toBeNull();
     expect(state.testShop.length).toBe(9);
   });
+
+  it("defaults to scenario s1", () => {
+    const state = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+    });
+    expect(state.scenario).toBe("s1");
+  });
+
+  it("stores scenario s2 on state", () => {
+    const state = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+      scenario: "s2",
+    });
+    expect(state.scenario).toBe("s2");
+  });
+
+  it("does not include climberPopBonus on initial state", () => {
+    const state = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+    });
+    expect(state.climberPopBonus).toBeUndefined();
+  });
+
+  it("scenario 2 test mode builds shop from s2 pools", () => {
+    const state = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+      mode: "test",
+      scenario: "s2",
+    });
+    expect(state.testShop).not.toBeNull();
+    expect(state.testShop.length).toBe(9);
+    expect(state.testShop).not.toContain("alien");
+  });
 });
 
 describe("addGuestToParty", () => {
@@ -170,7 +207,9 @@ describe("addGuestToParty", () => {
   it("enters blame phase when mrPopular auto-invites a trouble guest that pushes to 3", () => {
     const idGen = makeIdGen();
     const mrPop = { id: idGen(), type: "mrPopular", abilityUsed: false };
-    const wild = { id: idGen(), type: "wildBuddy", abilityUsed: false };
+    const wild1 = { id: idGen(), type: "wildBuddy", abilityUsed: false };
+    const wild2 = { id: idGen(), type: "wildBuddy", abilityUsed: false };
+    const wild3 = { id: idGen(), type: "wildBuddy", abilityUsed: false };
     const base = createInitialState({
       idGen: makeIdGen(),
       shuffleFn: (a) => a,
@@ -178,9 +217,8 @@ describe("addGuestToParty", () => {
     const s = {
       ...base,
       houseCapacity: 5,
-      house: [],
-      rolodex: [mrPop, wild],
-      trouble: 2,
+      house: [wild1, wild2],
+      rolodex: [mrPop, wild3],
     };
     const next = addGuestToParty(s, mrPop.id);
     expect(next.trouble).toBe(3);
@@ -243,22 +281,20 @@ describe("addGuestToParty", () => {
       idGen: makeIdGen(),
       shuffleFn: (a) => a,
     });
-    const hippie = { id: "h1", type: "hippie", abilityUsed: false, order: 0 };
-    const wildBuddy = {
-      id: "w1",
-      type: "wildBuddy",
-      abilityUsed: false,
-      order: 1,
-    };
+    // 2 wilds already in house with hippie; net trouble = 2-1 = 1
+    // adding a 3rd wild → 3 wilds, 1 hippie → net = 3-1 = 2 < 3 → no blame
     const state = {
       ...base,
-      house: [hippie],
-      rolodex: [wildBuddy],
-      trouble: 2,
+      house: [
+        { id: "h1", type: "hippie", abilityUsed: false, order: 0 },
+        { id: "w1", type: "wildBuddy", abilityUsed: false, order: 1 },
+        { id: "w2", type: "wildBuddy", abilityUsed: false, order: 2 },
+      ],
+      rolodex: [{ id: "w3", type: "wildBuddy", abilityUsed: false, order: 3 }],
       houseCapacity: 5,
     };
-    const result = addGuestToParty(state, "w1");
-    expect(result.trouble).toBe(3);
+    const result = addGuestToParty(state, "w3");
+    expect(result.trouble).toBe(2);
     expect(result.phase).toBe("party");
   });
 
@@ -267,22 +303,20 @@ describe("addGuestToParty", () => {
       idGen: makeIdGen(),
       shuffleFn: (a) => a,
     });
-    const hippie = { id: "h1", type: "hippie", abilityUsed: false, order: 0 };
-    const wildBuddy = {
-      id: "w1",
-      type: "wildBuddy",
-      abilityUsed: false,
-      order: 1,
-    };
+    // 3 wilds + hippie → net = 3-1 = 2; adding 4th wild → net = 4-1 = 3 → blame
     const state = {
       ...base,
-      house: [hippie],
-      rolodex: [wildBuddy],
-      trouble: 3,
-      houseCapacity: 5,
+      house: [
+        { id: "h1", type: "hippie", abilityUsed: false, order: 0 },
+        { id: "w1", type: "wildBuddy", abilityUsed: false, order: 1 },
+        { id: "w2", type: "wildBuddy", abilityUsed: false, order: 2 },
+        { id: "w3", type: "wildBuddy", abilityUsed: false, order: 3 },
+      ],
+      rolodex: [{ id: "w4", type: "wildBuddy", abilityUsed: false, order: 4 }],
+      houseCapacity: 6,
     };
-    const result = addGuestToParty(state, "w1");
-    expect(result.trouble).toBe(4);
+    const result = addGuestToParty(state, "w4");
+    expect(result.trouble).toBe(3);
     expect(result.phase).toBe("blame");
   });
 
@@ -374,6 +408,76 @@ describe("addGuestToParty", () => {
   it("does nothing if guest id is not in rolodex", () => {
     const next = addGuestToParty(state, "not-a-real-id");
     expect(next).toBe(state);
+  });
+
+  it("climber increments its own climberCount on arrival", () => {
+    const idGen = makeIdGen();
+    const climber = {
+      id: idGen(),
+      type: "climber",
+      abilityUsed: false,
+      order: 0,
+    };
+    const s = {
+      ...createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a }),
+      rolodex: [climber],
+    };
+    const next = addGuestToParty(s, climber.id);
+    expect(next.house[0].climberCount).toBe(1);
+  });
+
+  it("climber individual count does not exceed 9", () => {
+    const idGen = makeIdGen();
+    const climber = {
+      id: idGen(),
+      type: "climber",
+      abilityUsed: false,
+      order: 0,
+      climberCount: 9,
+    };
+    const s = {
+      ...createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a }),
+      rolodex: [climber],
+    };
+    const next = addGuestToParty(s, climber.id);
+    expect(next.house[0].climberCount).toBe(9);
+  });
+
+  it("cuteDog raises trouble threshold like hippie", () => {
+    // 2 wilds + cuteDog → net = 2-1 = 1; adding 3rd wild → net = 3-1 = 2 < 3 → no blame
+    const s = {
+      ...createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a }),
+      house: [
+        { id: "cd", type: "cuteDog", abilityUsed: false, order: 0 },
+        { id: "w1", type: "wildBuddy", abilityUsed: false, order: 1 },
+        { id: "w2", type: "wildBuddy", abilityUsed: false, order: 2 },
+      ],
+      rolodex: [{ id: "w3", type: "wildBuddy", abilityUsed: false, order: 3 }],
+      houseCapacity: 5,
+    };
+    const result = addGuestToParty(s, "w3");
+    expect(result.trouble).toBe(2);
+    expect(result.phase).toBe("party");
+  });
+
+  it("hippie and cuteDog together raise threshold by 2", () => {
+    // 3 wilds + hippie + cuteDog → net = 3-2 = 1; adding 4th wild → net = 4-2 = 2 < 3 → no blame
+    const s = {
+      ...createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a }),
+      house: [
+        { id: "h1", type: "hippie", abilityUsed: false, order: 0 },
+        { id: "cd", type: "cuteDog", abilityUsed: false, order: 1 },
+        { id: "w1", type: "wildBuddy", abilityUsed: false, order: 2 },
+        { id: "w2", type: "wildBuddy", abilityUsed: false, order: 3 },
+        { id: "w3", type: "wildBuddy", abilityUsed: false, order: 4 },
+      ],
+      rolodex: [{ id: "w4", type: "wildBuddy", abilityUsed: false, order: 5 }],
+      houseCapacity: 7,
+    };
+    // 4 wilds, 2 white flags → net = 4-2 = 2 < 3 → party
+    const result = addGuestToParty(s, "w4");
+    expect(result.trouble).toBe(2);
+    expect(result.phase).toBe("party");
   });
 });
 
@@ -496,6 +600,17 @@ describe("confirmSummary", () => {
     const next = confirmSummary(state);
     expect(next.testShop).toBeNull();
   });
+
+  it("sets phase to gameOver when nightsLeft reaches 0", () => {
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+    });
+    const state = { ...base, house: [], phase: "summary", nightsLeft: 1 };
+    const next = confirmSummary(state);
+    expect(next.nightsLeft).toBe(0);
+    expect(next.phase).toBe("gameOver");
+  });
 });
 
 describe("scoreHouse", () => {
@@ -505,6 +620,68 @@ describe("scoreHouse", () => {
       { id: "b", type: "richPal", abilityUsed: false },
     ];
     expect(scoreHouse(house, 10)).toEqual({ pop: 1, cash: 1 });
+  });
+
+  it("introvert scores +1 pop per empty tile on top of base popBonus", () => {
+    // 1 introvert in a capacity-5 house = 4 empty tiles → 1 (base) + 4 = 5 pop
+    const house = [{ id: "i1", type: "introvert", abilityUsed: false }];
+    expect(scoreHouse(house, 5).pop).toBe(5);
+  });
+
+  it("two introverts each add empty-tile bonus", () => {
+    // 2 introverts, capacity 5, 3 empty → each gets +3: (1+3)*2 = 8 pop
+    const house = [
+      { id: "i1", type: "introvert", abilityUsed: false },
+      { id: "i2", type: "introvert", abilityUsed: false },
+    ];
+    expect(scoreHouse(house, 5).pop).toBe(8);
+  });
+
+  it("mascot scores +1 pop per oldFriend in house", () => {
+    // 1 mascot + 2 oldFriends → mascot: 1(base)+2(bonus)=3, oldFriends: 2*1=2 → total 5
+    const house = [
+      { id: "m1", type: "mascot", abilityUsed: false },
+      { id: "o1", type: "oldFriend", abilityUsed: false },
+      { id: "o2", type: "oldFriend", abilityUsed: false },
+    ];
+    expect(scoreHouse(house, 10).pop).toBe(5);
+  });
+
+  it("mascot scores 0 bonus when no oldFriends present", () => {
+    const house = [{ id: "m1", type: "mascot", abilityUsed: false }];
+    expect(scoreHouse(house, 10).pop).toBe(1);
+  });
+
+  it("writer scores +2 pop per trouble guest in house", () => {
+    // 1 writer + 1 wildBuddy (trouble) → writer: 1+2=3, wildBuddy: 2 → total 5
+    const house = [
+      { id: "w1", type: "writer", abilityUsed: false },
+      { id: "wb1", type: "wildBuddy", abilityUsed: false },
+    ];
+    expect(scoreHouse(house, 10).pop).toBe(5);
+  });
+
+  it("writer counts all trouble guests including scenario 2", () => {
+    // 1 writer + 1 gangster (trouble) + 1 gambler (trouble) → 1+4=5 pop for writer, 0+2=2 for gangster, 2+3=5 cash/pop for gambler
+    const house = [
+      { id: "w1", type: "writer", abilityUsed: false },
+      { id: "g1", type: "gangster", abilityUsed: false },
+      { id: "gm1", type: "gambler", abilityUsed: false },
+    ];
+    expect(scoreHouse(house, 10).pop).toBe(1 + 4 + 0 + 2); // writer(1+4)+gangster(0)+gambler(2)
+  });
+
+  it("climber contributes its climberCount to pop", () => {
+    const house = [
+      { id: "o1", type: "oldFriend", abilityUsed: false },
+      { id: "c1", type: "climber", abilityUsed: false, climberCount: 3 },
+    ];
+    expect(scoreHouse(house, 10).pop).toBe(4); // 1 (oldFriend) + 3 (climber)
+  });
+
+  it("climber with no climberCount contributes 0 pop", () => {
+    const house = [{ id: "c1", type: "climber", abilityUsed: false }];
+    expect(scoreHouse(house, 10).pop).toBe(0);
   });
 });
 
@@ -571,6 +748,25 @@ describe("blameGuest", () => {
     };
     const next = blameGuest(state, "a");
     expect(next.testShop).toBeNull();
+  });
+
+  it("sets phase to gameOver when nightsLeft reaches 0", () => {
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+    });
+    const house = [{ id: "a", type: "wildBuddy", abilityUsed: false }];
+    const state = {
+      ...base,
+      house,
+      trouble: 3,
+      phase: "blame",
+      blameContext: "trouble",
+      nightsLeft: 1,
+    };
+    const next = blameGuest(state, "a");
+    expect(next.nightsLeft).toBe(0);
+    expect(next.phase).toBe("gameOver");
   });
 });
 
@@ -671,6 +867,40 @@ describe("purchaseGuest", () => {
     };
     const next = purchaseGuest(state, "alien", { idGen: () => "a" });
     expect(next.purchasedCounts.alien).toBe(51);
+  });
+
+  it("refuses a scenario 2 guest when in scenario 1", () => {
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+      scenario: "s1",
+    });
+    const state = { ...base, popularity: 100 };
+    const next = purchaseGuest(state, "privateEye");
+    expect(next).toBe(state);
+  });
+
+  it("allows a scenario 2 guest when in scenario 2", () => {
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+      scenario: "s2",
+    });
+    const state = { ...base, popularity: 100 };
+    const next = purchaseGuest(state, "privateEye", { idGen: () => "p1" });
+    expect(next.popularity).toBeLessThan(100);
+    expect(next.rolodex.some((g) => g.type === "privateEye")).toBe(true);
+  });
+
+  it("refuses a scenario 1 guest when in scenario 2", () => {
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+      scenario: "s2",
+    });
+    const state = { ...base, popularity: 100 };
+    const next = purchaseGuest(state, "alien");
+    expect(next).toBe(state);
   });
 
   it("refuses a guest type that has no shopCost", () => {

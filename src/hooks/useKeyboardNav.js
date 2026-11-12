@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { SHOP_GUESTS } from "../lib/guests.js";
 import { confirmDogReveal } from "../lib/gameState.js";
 
 const COLS = 9;
@@ -61,6 +60,7 @@ export default function useKeyboardNav({
   handleEndParty,
   handleDoor,
   handleGuestClick,
+  shopGuests = [],
 }) {
   useEffect(() => {
     const handleKey = (e) => {
@@ -138,7 +138,6 @@ export default function useKeyboardNav({
       }
 
       if (phase === "shop") {
-        const shopGuests = state.testShop ?? SHOP_GUESTS;
         const totalItems = shopGuests.length + 3;
         let next = shopCursor;
         if (e.key === "a" || e.key === "A" || e.key === "ArrowLeft")
@@ -160,6 +159,13 @@ export default function useKeyboardNav({
           return;
         }
         if (next !== shopCursor) setShopCursor(next);
+        return;
+      }
+
+      if (e.key === "Escape") {
+        if (state.kickMode) setState((s) => ({ ...s, kickMode: undefined }));
+        else if (state.driverMode)
+          setState((s) => ({ ...s, driverMode: null }));
         return;
       }
 

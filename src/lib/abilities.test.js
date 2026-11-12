@@ -142,14 +142,14 @@ describe("kickGuest", () => {
       shuffleFn: (a) => a,
     });
     const guard = { id: "g1", type: "securityGuard", abilityUsed: false };
-    const target = { id: "t1", type: "wildBuddy", abilityUsed: false };
+    const wild1 = { id: "w1", type: "wildBuddy", abilityUsed: false };
+    const wild2 = { id: "w2", type: "wildBuddy", abilityUsed: false };
     const state = {
       ...base,
-      house: [guard, target],
+      house: [guard, wild1, wild2],
       kickMode: { kickerId: "g1" },
-      trouble: 2,
     };
-    const result = kickGuest(state, "g1", "t1");
+    const result = kickGuest(state, "g1", "w1");
     expect(result.trouble).toBe(1);
   });
 
@@ -159,12 +159,13 @@ describe("kickGuest", () => {
       shuffleFn: (a) => a,
     });
     const guard = { id: "g1", type: "securityGuard", abilityUsed: false };
+    const wild1 = { id: "w1", type: "wildBuddy", abilityUsed: false };
+    const wild2 = { id: "w2", type: "wildBuddy", abilityUsed: false };
     const target = { id: "t1", type: "oldFriend", abilityUsed: false };
     const state = {
       ...base,
-      house: [guard, target],
+      house: [guard, wild1, wild2, target],
       kickMode: { kickerId: "g1" },
-      trouble: 2,
     };
     const result = kickGuest(state, "g1", "t1");
     expect(result.trouble).toBe(2);
@@ -202,6 +203,78 @@ describe("kickGuest", () => {
     };
     const result = kickGuest(state, "g1", "unknown-id");
     expect(result.rolodex).toEqual([]);
+  });
+});
+
+describe("activateAbility — refresh (grillmaster)", () => {
+  it("moves all house guests back to rolodex and empties house", () => {
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+    });
+    const grill = { id: "g1", type: "grillmaster", abilityUsed: false };
+    const friend = { id: "f1", type: "oldFriend", abilityUsed: false };
+    const state = { ...base, house: [grill, friend], rolodex: [] };
+    const result = activateAbility(state, grill.id);
+    expect(result.house).toHaveLength(0);
+    expect(result.rolodex.map((g) => g.id)).toContain("g1");
+    expect(result.rolodex.map((g) => g.id)).toContain("f1");
+  });
+
+  it("marks grillmaster abilityUsed before returning to rolodex", () => {
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+    });
+    const grill = { id: "g1", type: "grillmaster", abilityUsed: false };
+    const state = { ...base, house: [grill], rolodex: [] };
+    const result = activateAbility(state, grill.id);
+    const grillInRolodex = result.rolodex.find((g) => g.id === "g1");
+    expect(grillInRolodex.abilityUsed).toBe(true);
+  });
+
+  it("phase stays party after refresh", () => {
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+    });
+    const grill = { id: "g1", type: "grillmaster", abilityUsed: false };
+    const state = { ...base, house: [grill], rolodex: [], phase: "party" };
+    const result = activateAbility(state, grill.id);
+    expect(result.phase).toBe("party");
+  });
+
+  it("appends to existing rolodex guests", () => {
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+    });
+    const grill = { id: "g1", type: "grillmaster", abilityUsed: false };
+    const existing = { id: "e1", type: "richPal", abilityUsed: false };
+    const state = { ...base, house: [grill], rolodex: [existing] };
+    const result = activateAbility(state, grill.id);
+    expect(result.rolodex.map((g) => g.id)).toContain("e1");
+    expect(result.rolodex.map((g) => g.id)).toContain("g1");
+  });
+
+  it("does not return banned house guests to rolodex", () => {
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+    });
+    const grill = { id: "g1", type: "grillmaster", abilityUsed: false };
+    const friend = { id: "f1", type: "oldFriend", abilityUsed: false };
+    const banned = { id: "b1", type: "wildBuddy", abilityUsed: false };
+    const state = {
+      ...base,
+      house: [grill, friend, banned],
+      rolodex: [],
+      bannedThisParty: [banned.id],
+    };
+    const result = activateAbility(state, grill.id);
+    expect(result.rolodex.map((g) => g.id)).toContain("g1");
+    expect(result.rolodex.map((g) => g.id)).toContain("f1");
+    expect(result.rolodex.map((g) => g.id)).not.toContain("b1");
   });
 });
 

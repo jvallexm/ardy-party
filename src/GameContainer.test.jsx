@@ -8,30 +8,47 @@ beforeEach(() => {
   vi.stubGlobal("crypto", { randomUUID: () => `u-${++idCounter}` });
 });
 
+function selectScenario1Classic() {
+  fireEvent.click(screen.getByRole("button", { name: /Scenario 1/ }));
+  fireEvent.click(screen.getByRole("button", { name: /Classic/ }));
+}
+
+function selectScenario1Test() {
+  fireEvent.click(screen.getByRole("button", { name: /Scenario 1/ }));
+  fireEvent.click(screen.getByRole("button", { name: /Test Mode/ }));
+}
+
 describe("GameContainer", () => {
-  it("shows mode selection screen initially", () => {
+  it("shows scenario selection screen initially", () => {
     render(<GameContainer />);
+    expect(screen.getByRole("button", { name: /Scenario 1/ })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Scenario 2/ })).toBeTruthy();
+  });
+
+  it("picking Scenario 1 shows Classic/Test options", () => {
+    render(<GameContainer />);
+    fireEvent.click(screen.getByRole("button", { name: /Scenario 1/ }));
     expect(screen.getByRole("button", { name: /Classic/ })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Test Mode/ })).toBeTruthy();
   });
 
   it("clicking Classic replaces mode select with the game", () => {
     render(<GameContainer />);
-    fireEvent.click(screen.getByRole("button", { name: /Classic/ }));
+    selectScenario1Classic();
     expect(screen.getByRole("button", { name: /End Party/ })).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Classic/ })).toBeNull();
   });
 
   it("clicking Test Mode replaces mode select with the game", () => {
     render(<GameContainer />);
-    fireEvent.click(screen.getByRole("button", { name: /Test Mode/ }));
+    selectScenario1Test();
     expect(screen.getByRole("button", { name: /End Party/ })).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Test Mode/ })).toBeNull();
   });
 
   it("test mode shop has fewer items than classic shop", () => {
     const { unmount } = render(<GameContainer />);
-    fireEvent.click(screen.getByRole("button", { name: /Classic/ }));
+    selectScenario1Classic();
     fireEvent.click(screen.getByRole("button", { name: /End Party/ }));
     fireEvent.click(screen.getByRole("button", { name: /Go to Shop/ }));
     const classicTileCount = screen
@@ -40,7 +57,7 @@ describe("GameContainer", () => {
     unmount();
 
     render(<GameContainer />);
-    fireEvent.click(screen.getByRole("button", { name: /Test Mode/ }));
+    selectScenario1Test();
     fireEvent.click(screen.getByRole("button", { name: /End Party/ }));
     fireEvent.click(screen.getByRole("button", { name: /Go to Shop/ }));
     const testTileCount = screen

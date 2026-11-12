@@ -1,23 +1,23 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
-/**
- * Pre-game mode selection screen presented before the first party.
- *
- * Pressing C selects Classic; pressing T selects Test Mode.
- *
- * @param {object} props
- * @param {function} props.onSelect - Called with 'classic' or 'test' when a mode is chosen.
- * @returns {React.ReactElement} The mode picker window.
- */
 export default function ModeSelect({ onSelect }) {
+  const [scenario, setScenario] = useState(null);
+
+  function pickMode(mode) {
+    if (!scenario) return;
+    onSelect({ scenario, mode });
+  }
+
   useEffect(() => {
     const handleKey = (e) => {
-      if (e.key === "c" || e.key === "C") onSelect("classic");
-      if (e.key === "t" || e.key === "T") onSelect("test");
+      if (e.key === "1") setScenario("s1");
+      else if (e.key === "2") setScenario("s2");
+      else if (e.key === "c" || e.key === "C") pickMode("classic");
+      else if (e.key === "t" || e.key === "T") pickMode("test");
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [onSelect]);
+  }, [scenario, onSelect]);
 
   return (
     <div className="window mode-select">
@@ -25,19 +25,38 @@ export default function ModeSelect({ onSelect }) {
         <span>Ardy Party</span>
       </div>
       <div className="window-body mode-select-body">
-        <p>Choose your game mode:</p>
+        <p>Choose your scenario:</p>
+        <div className="mode-select-buttons">
+          <button
+            type="button"
+            className={`btn${scenario === "s1" ? " active" : ""}`}
+            onClick={() => setScenario("s1")}
+          >
+            Scenario 1
+          </button>
+          <button
+            type="button"
+            className={`btn${scenario === "s2" ? " active" : ""}`}
+            onClick={() => setScenario("s2")}
+          >
+            Scenario 2
+          </button>
+        </div>
+        <p>Choose your mode:</p>
         <div className="mode-select-buttons">
           <button
             type="button"
             className="btn"
-            onClick={() => onSelect("classic")}
+            disabled={!scenario}
+            onClick={() => pickMode("classic")}
           >
             Classic
           </button>
           <button
             type="button"
             className="btn"
-            onClick={() => onSelect("test")}
+            disabled={!scenario}
+            onClick={() => pickMode("test")}
           >
             Test Mode
           </button>

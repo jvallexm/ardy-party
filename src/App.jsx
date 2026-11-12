@@ -9,7 +9,12 @@ import Shop from "./components/Shop.jsx";
 import BlamePicker from "./components/modals/BlamePicker.jsx";
 import PeekNextGuest from "./components/modals/PeekNextGuest.jsx";
 import WinScreen from "./components/modals/WinScreen.jsx";
-import { GUEST_TYPES, SHOP_GUESTS } from "./lib/guests.js";
+import GameOver from "./components/modals/GameOver.jsx";
+import { GUEST_TYPES } from "./lib/guests.js";
+import {
+  SCENARIO_1_SHOP_GUESTS,
+  SCENARIO_2_SHOP_GUESTS,
+} from "./lib/constants.js";
 import {
   createInitialState,
   addGuestToParty,
@@ -105,6 +110,10 @@ export default function App({ initialState, initialCursor } = {}) {
       : state.rolodex),
   ].sort((a, b) => a.order - b.order);
 
+  const scenarioShopGuests =
+    state.scenario === "s2" ? SCENARIO_2_SHOP_GUESTS : SCENARIO_1_SHOP_GUESTS;
+  const shopGuests = state.testShop ?? scenarioShopGuests;
+
   useKeyboardNav({
     state,
     setState,
@@ -129,10 +138,15 @@ export default function App({ initialState, initialCursor } = {}) {
     handleEndParty,
     handleDoor,
     handleGuestClick,
+    shopGuests,
   });
 
   if (state.phase === "won") {
     return <WinScreen state={state} />;
+  }
+
+  if (state.phase === "gameOver") {
+    return <GameOver state={state} />;
   }
 
   if (state.phase === "blame") {
@@ -145,8 +159,6 @@ export default function App({ initialState, initialCursor } = {}) {
       />
     );
   }
-
-  const shopGuests = state.testShop ?? SHOP_GUESTS;
 
   if (state.phase === "shop") {
     return (

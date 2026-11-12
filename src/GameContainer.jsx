@@ -14,8 +14,8 @@ import { createInitialState } from "./lib/gameState.js";
 export default function GameContainer() {
   const [gameState, setGameState] = useState(null);
 
-  const handleSelectMode = (mode) => {
-    setGameState(createInitialState({ mode }));
+  const handleSelectMode = ({ scenario, mode }) => {
+    setGameState(createInitialState({ mode, scenario }));
   };
 
   if (!gameState) return <ModeSelect onSelect={handleSelectMode} />;

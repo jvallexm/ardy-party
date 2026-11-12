@@ -1,17 +1,11 @@
-import { GUEST_TYPES } from "./guests.js";
-
-function markAbilityUsed(house, guestId) {
-  return house.map((g) => (g.id === guestId ? { ...g, abilityUsed: true } : g));
-}
+import {
+  GUEST_TYPES,
+  markAbilityUsed,
+  computeTrouble,
+} from "./guests/index.js";
 
 export function anyUnusedAbilities(house) {
-  return house.some((g) => {
-    const def = GUEST_TYPES[g.type];
-    if (!def.ability) return false;
-    if (def.ability === "fullHouseBonus") return false;
-    if (def.ability === "removeTrouble") return false;
-    return !g.abilityUsed;
-  });
+  return house.some((g) => GUEST_TYPES[g.type].onUse && !g.abilityUsed);
 }
 
 /**
@@ -36,33 +30,8 @@ export function activateAbility(state, guestId) {
   if (guest.abilityUsed) return state;
   const def = GUEST_TYPES[guest.type];
   if (!def.ability) return state;
-
-  switch (def.ability) {
-    case "driver": {
-      return {
-        ...state,
-        house: markAbilityUsed(state.house, guestId),
-        driverMode: { driverId: guestId },
-      };
-    }
-    case "reveal": {
-      const nextGuest = state.rolodex.find(
-        (g) => !state.bannedThisParty.includes(g.id),
-      );
-      if (!nextGuest) return state;
-      return {
-        ...state,
-        dogRevealGuestId: nextGuest.id,
-        phase: "dogReveal",
-        house: markAbilityUsed(state.house, guestId),
-      };
-    }
-    case "kick": {
-      return { ...state, kickMode: { kickerId: guestId } };
-    }
-    default:
-      return state;
-  }
+  if (!def.onUse) return state;
+  return def.onUse(state, guestId);
 }
 
 /**
@@ -79,7 +48,6 @@ export function activateAbility(state, guestId) {
  */
 export function kickGuest(state, kickerId, targetId) {
   const target = state.house.find((g) => g.id === targetId);
-  const targetIsTrouble = target && GUEST_TYPES[target.type].trouble;
   const house = markAbilityUsed(state.house, kickerId).filter(
     (g) => g.id !== targetId,
   );
@@ -89,7 +57,7 @@ export function kickGuest(state, kickerId, targetId) {
     house,
     rolodex: target ? [...state.rolodex, target] : state.rolodex,
     bannedThisParty: [...state.bannedThisParty, targetId],
-    trouble: targetIsTrouble ? Math.max(0, state.trouble - 1) : state.trouble,
+    trouble: computeTrouble(house),
   };
 }
 

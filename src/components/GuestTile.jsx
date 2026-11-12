@@ -27,6 +27,10 @@ export default function GuestTile({
   inactive = false,
 }) {
   const def = GUEST_TYPES[guest.type];
+  const popBonusOverride =
+    guest.type === "climber" && guest.climberCount > 0
+      ? guest.climberCount
+      : undefined;
   const isDancer = guest.type === "dancer";
   const showAbility =
     (def.trouble && def.abilityIcon) ||
@@ -45,7 +49,12 @@ export default function GuestTile({
       disabled={disabled || inactive}
       title={title}
     >
-      <TileVisuals guestType={guest.type} def={def} showAbility={showAbility} />
+      <TileVisuals
+        guestType={guest.type}
+        def={def}
+        showAbility={showAbility}
+        popBonusOverride={popBonusOverride}
+      />
     </button>
   );
 }

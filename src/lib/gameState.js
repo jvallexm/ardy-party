@@ -1,4 +1,10 @@
-import { GUEST_TYPES, HOUSE_EXPANSION_COSTS, buildTestShop } from "./guests.js";
+import {
+  GUEST_TYPES,
+  HOUSE_EXPANSION_COSTS,
+  buildTestShop,
+  computeTrouble,
+} from "./guests/index.js";
+import { SCENARIO_1_SHOP_GUESTS, SCENARIO_2_SHOP_GUESTS } from "./constants.js";
 export {
   activateAbility,
   kickGuest,
@@ -35,6 +41,7 @@ export function createInitialState({
   idGen = defaultIdGen,
   shuffleFn = shuffleArray,
   mode = "classic",
+  scenario = "s1",
 } = {}) {
   const rolodex = [];
   for (let i = 0; i < 4; i++)
@@ -59,7 +66,8 @@ export function createInitialState({
     purchasedCounts: {},
     nextOrder: rolodex.length,
     mode,
-    testShop: mode === "test" ? buildTestShop(shuffleFn) : null,
+    scenario,
+    testShop: mode === "test" ? buildTestShop(shuffleFn, {}, scenario) : null,
   };
 }
 
@@ -92,19 +100,18 @@ export function countStars(house) {
  * // => { pop: 9, cash: -1 }
  */
 export function scoreHouse(house, houseCapacity) {
-  const dancerCount = house.filter((g) => g.type === "dancer").length;
-  const dancerPop = dancerCount * dancerCount;
-  const comedianCount = house.filter((g) => g.type === "comedian").length;
-  const isFull = house.length === houseCapacity;
-  const comedianBonus = isFull ? comedianCount * 5 : 0;
-
-  let pop = dancerPop + comedianBonus;
+  let pop = 0;
   let cash = 0;
+  const seen = new Set();
   for (const g of house) {
     const def = GUEST_TYPES[g.type];
-    if (g.type === "dancer") {
-      // dancer pop already counted
-      cash += def.cashBonus;
+    if (def.onScore) {
+      if (!seen.has(g.type)) {
+        seen.add(g.type);
+        const bonus = def.onScore(house, houseCapacity);
+        pop += bonus.pop;
+        cash += bonus.cash;
+      }
     } else {
       pop += def.popBonus;
       cash += def.cashBonus;
@@ -145,43 +152,26 @@ export function addGuestToParty(state, guestId) {
   const nextHouse = [...state.house, guest];
   let next = { ...state, rolodex: nextRolodex, house: nextHouse };
 
+  if (next.house.length > next.houseCapacity) {
+    return { ...next, phase: "blame", blameContext: "overcapacity" };
+  }
+
   if (countStars(next.house) >= 4) {
     return { ...next, phase: "won" };
   }
 
-  if (def.trouble) {
-    next = { ...next, trouble: next.trouble + 1 };
-  }
+  const trouble = computeTrouble(next.house);
+  next = { ...next, trouble };
 
-  const hippieCount = (state) =>
-    state.house.filter((g) => g.type === "hippie").length;
-
-  if (next.trouble >= TROUBLE_THRESHOLD + hippieCount(next)) {
+  if (trouble >= TROUBLE_THRESHOLD) {
     return { ...next, phase: "blame", blameContext: "trouble" };
   }
 
-  // Mr. Popular ability: auto-invite next unbanned guest
-  if (def.ability === "autoInvite") {
-    const nextGuest = next.rolodex.find(
-      (g) => !next.bannedThisParty.includes(g.id),
-    );
-    if (nextGuest) {
-      const nextDef = GUEST_TYPES[nextGuest.type];
-      const afterRolodex = next.rolodex.filter((g) => g.id !== nextGuest.id);
-      const afterHouse = [...next.house, nextGuest];
-      next = { ...next, rolodex: afterRolodex, house: afterHouse };
-      if (countStars(next.house) >= 4) {
-        return { ...next, phase: "won" };
-      }
-      if (nextDef.trouble) {
-        next = { ...next, trouble: next.trouble + 1 };
-      }
-      if (next.trouble >= TROUBLE_THRESHOLD + hippieCount(next)) {
-        return { ...next, phase: "blame", blameContext: "trouble" };
-      }
-      if (next.house.length > next.houseCapacity) {
-        return { ...next, phase: "blame", blameContext: "overcapacity" };
-      }
+  if (def.onEnter) {
+    next = def.onEnter(next, addGuestToParty, guest.id);
+    if (next.phase !== "party") return next;
+    if (next.house.length > next.houseCapacity) {
+      return { ...next, phase: "blame", blameContext: "overcapacity" };
     }
   }
 
@@ -226,16 +216,17 @@ export function driverPickGuest(state, targetGuestId) {
  */
 export function confirmSummary(state) {
   const { pop, cash } = scoreHouse(state.house, state.houseCapacity);
+  const nightsLeft = state.nightsLeft - 1;
   return {
     ...state,
     popularity: clamp(state.popularity + pop, 0, MAX_POPULARITY),
     cash: clamp(state.cash + cash, 0, MAX_CASH),
-    nightsLeft: state.nightsLeft - 1,
-    phase: "shop",
+    nightsLeft,
+    phase: nightsLeft <= 0 ? "gameOver" : "shop",
     rolodex: [...state.rolodex, ...state.house],
     testShop:
       state.mode === "test"
-        ? buildTestShop(undefined, state.purchasedCounts)
+        ? buildTestShop(undefined, state.purchasedCounts, state.scenario)
         : null,
   };
 }
@@ -252,19 +243,20 @@ export function confirmSummary(state) {
  */
 export function blameGuest(state, guestId) {
   const nextHouse = state.house.filter((g) => g.id !== guestId);
+  const nightsLeft = state.nightsLeft - 1;
   return {
     ...state,
     house: nextHouse,
     bannedThisParty: [guestId],
-    nightsLeft: state.nightsLeft - 1,
+    nightsLeft,
     trouble: 0,
-    phase: "shop",
+    phase: nightsLeft <= 0 ? "gameOver" : "shop",
     blameContext: null,
     driverMode: null,
     rolodex: [...state.rolodex, ...nextHouse],
     testShop:
       state.mode === "test"
-        ? buildTestShop(undefined, state.purchasedCounts)
+        ? buildTestShop(undefined, state.purchasedCounts, state.scenario)
         : null,
   };
 }
@@ -284,6 +276,9 @@ export function blameGuest(state, guestId) {
 export function purchaseGuest(state, guestType, { idGen = defaultIdGen } = {}) {
   const def = GUEST_TYPES[guestType];
   if (!def || def.shopCost === null) return state;
+  const scenarioGuests =
+    state.scenario === "s2" ? SCENARIO_2_SHOP_GUESTS : SCENARIO_1_SHOP_GUESTS;
+  if (!scenarioGuests.includes(guestType)) return state;
   const current = state.purchasedCounts[guestType] || 0;
   if (current >= def.maxPurchase) return state;
   if (state.popularity < def.shopCost) return state;

@@ -14,15 +14,21 @@ import { formatBonus } from "../lib/display.js";
  * @param {boolean} props.showAbility - When true, renders the ability icon if one is defined.
  * @returns {React.ReactElement} A fragment of badge and emoji spans.
  */
-export default function TileVisuals({ guestType, def, showAbility }) {
+export default function TileVisuals({
+  guestType,
+  def,
+  showAbility,
+  popBonusOverride,
+}) {
   const isDancer = guestType === "dancer";
+  const popBonus = popBonusOverride ?? def.popBonus;
   return (
     <>
       {showAbility && def.abilityIcon && (
         <span className="tile-ability-icon">{def.abilityIcon}</span>
       )}
-      {!isDancer && def.popBonus !== 0 && (
-        <span className="tile-pop">{formatBonus(def.popBonus)}</span>
+      {!isDancer && popBonus !== 0 && (
+        <span className="tile-pop">{formatBonus(popBonus)}</span>
       )}
       {def.cashBonus !== 0 && (
         <span className="tile-cash">{formatBonus(def.cashBonus)}</span>
