@@ -358,6 +358,25 @@ describe("confirmSummary", () => {
     const next = confirmSummary(state);
     expect(next.popularity).toBe(0);
   });
+
+  it("regenerates testShop in test mode", () => {
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+      mode: "test",
+    });
+    const state = { ...base, house: [], phase: "summary" };
+    const next = confirmSummary(state);
+    expect(next.testShop).not.toBeNull();
+    expect(next.testShop.length).toBe(9);
+  });
+
+  it("keeps testShop null in classic mode", () => {
+    const base = createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a });
+    const state = { ...base, house: [], phase: "summary" };
+    const next = confirmSummary(state);
+    expect(next.testShop).toBeNull();
+  });
 });
 
 describe("scoreHouse", () => {
@@ -397,6 +416,27 @@ describe("blameGuest", () => {
     expect(next.cash).toBe(5);
     expect(next.popularity).toBe(5);
     expect(next.nightsLeft).toBe(base.nightsLeft - 1);
+  });
+
+  it("regenerates testShop in test mode", () => {
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+      mode: "test",
+    });
+    const house = [{ id: "a", type: "wildBuddy", abilityUsed: false }];
+    const state = { ...base, house, trouble: 3, phase: "blame", blameContext: "trouble" };
+    const next = blameGuest(state, "a");
+    expect(next.testShop).not.toBeNull();
+    expect(next.testShop.length).toBe(9);
+  });
+
+  it("keeps testShop null in classic mode", () => {
+    const base = createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a });
+    const house = [{ id: "a", type: "wildBuddy", abilityUsed: false }];
+    const state = { ...base, house, trouble: 3, phase: "blame", blameContext: "trouble" };
+    const next = blameGuest(state, "a");
+    expect(next.testShop).toBeNull();
   });
 });
 

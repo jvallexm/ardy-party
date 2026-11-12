@@ -234,6 +234,7 @@ export function confirmSummary(state) {
     nightsLeft: state.nightsLeft - 1,
     phase: "shop",
     rolodex: [...state.rolodex, ...state.house],
+    testShop: state.mode === "test" ? buildTestShop() : null,
   };
 }
 
@@ -259,6 +260,7 @@ export function blameGuest(state, guestId) {
     blameContext: null,
     driverMode: null,
     rolodex: [...state.rolodex, ...nextHouse],
+    testShop: state.mode === "test" ? buildTestShop() : null,
   };
 }
 
