@@ -247,7 +247,7 @@ export function blameGuest(state, guestId) {
   return {
     ...state,
     house: nextHouse,
-    bannedThisParty: [guestId],
+    bannedThisParty: [...state.bannedThisParty, guestId],
     nightsLeft,
     trouble: 0,
     phase: nightsLeft <= 0 ? "gameOver" : "shop",

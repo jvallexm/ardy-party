@@ -707,7 +707,7 @@ describe("blameGuest", () => {
     };
     const next = blameGuest(state, "a");
     expect(next.house.map((g) => g.id)).toEqual(["b"]);
-    expect(next.bannedThisParty).toEqual(["a"]);
+    expect(next.bannedThisParty).toEqual(["old-ban", "a"]);
     expect(next.phase).toBe("shop");
     expect(next.cash).toBe(5);
     expect(next.popularity).toBe(5);
@@ -1000,5 +1000,54 @@ describe("countStars", () => {
       { id: "c", type: "alien", abilityUsed: false },
     ];
     expect(countStars(house)).toBe(2);
+  });
+});
+
+describe("addGuestToParty — scenario 2 star win condition", () => {
+  it("transitions to won phase when 4th mermaid enters the house", () => {
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+      scenario: "s2",
+    });
+    const mermaids = [
+      { id: "m1", type: "mermaid", abilityUsed: false },
+      { id: "m2", type: "mermaid", abilityUsed: false },
+      { id: "m3", type: "mermaid", abilityUsed: false },
+    ];
+    const m4 = { id: "m4", type: "mermaid", abilityUsed: false };
+    const state = {
+      ...base,
+      house: mermaids,
+      rolodex: [m4],
+      bannedThisParty: [],
+      houseCapacity: 10,
+    };
+    const result = addGuestToParty(state, "m4");
+    expect(result.phase).toBe("won");
+    expect(result.house).toHaveLength(4);
+  });
+
+  it("transitions to won phase when 4th superhero enters the house", () => {
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+      scenario: "s2",
+    });
+    const heroes = [
+      { id: "h1", type: "superhero", abilityUsed: false },
+      { id: "h2", type: "superhero", abilityUsed: false },
+      { id: "h3", type: "superhero", abilityUsed: false },
+    ];
+    const h4 = { id: "h4", type: "superhero", abilityUsed: false };
+    const state = {
+      ...base,
+      house: heroes,
+      rolodex: [h4],
+      bannedThisParty: [],
+      houseCapacity: 10,
+    };
+    const result = addGuestToParty(state, "h4");
+    expect(result.phase).toBe("won");
   });
 });

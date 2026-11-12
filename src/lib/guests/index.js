@@ -283,7 +283,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 4,
     maxPurchase: 4,
-    description: null,
+    description: "Invite any guest directly from your rolodex.",
     onUse(state, guestId) {
       return { ...markUsed(state, guestId), driverMode: { driverId: guestId } };
     },
@@ -373,7 +373,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 7,
     maxPurchase: 4,
-    description: null,
+    description: "+1 trouble limit while at the party.",
     static: { troubleBonus: 1 },
   },
   gambler: {

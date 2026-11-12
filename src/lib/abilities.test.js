@@ -276,6 +276,18 @@ describe("activateAbility — refresh (grillmaster)", () => {
     expect(result.rolodex.map((g) => g.id)).toContain("f1");
     expect(result.rolodex.map((g) => g.id)).not.toContain("b1");
   });
+
+  it("resets trouble to 0 after refresh", () => {
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+    });
+    const grill = { id: "g1", type: "grillmaster", abilityUsed: false };
+    const wild = { id: "w1", type: "wildBuddy", abilityUsed: false };
+    const state = { ...base, house: [grill, wild], trouble: 1 };
+    const result = activateAbility(state, grill.id);
+    expect(result.trouble).toBe(0);
+  });
 });
 
 describe("confirmDogReveal", () => {
