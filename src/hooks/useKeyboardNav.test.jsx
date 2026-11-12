@@ -664,7 +664,9 @@ describe("App - keyboard navigation", () => {
       house: [],
     });
     render(<App initialState={s} />);
-    press("d"); press("d"); press("d"); // cursor 0→1→2→3 (rolodex tile)
+    press("d");
+    press("d");
+    press("d"); // cursor 0→1→2→3 (rolodex tile)
     press(" ");
     expect(screen.getByRole("button", { name: /close/i })).toBeTruthy();
   });

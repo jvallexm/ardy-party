@@ -74,7 +74,11 @@ export default function useKeyboardNav({
         }
         if (e.key === " " || e.key === "Enter") {
           e.preventDefault();
-          if (handleRolodexPick && rolodexCursor >= 0 && rolodexGuests[rolodexCursor]) {
+          if (
+            handleRolodexPick &&
+            rolodexCursor >= 0 &&
+            rolodexGuests[rolodexCursor]
+          ) {
             handleRolodexPick(rolodexGuests[rolodexCursor]);
           } else {
             setRolodexOpen(false);
@@ -233,5 +237,13 @@ export default function useKeyboardNav({
 
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [state, cursor, rolodexOpen, rolodexCursor, rolodexGuests, blameCursor, shopCursor]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [
+    state,
+    cursor,
+    rolodexOpen,
+    rolodexCursor,
+    rolodexGuests,
+    blameCursor,
+    shopCursor,
+  ]); // eslint-disable-line react-hooks/exhaustive-deps
 }

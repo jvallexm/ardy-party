@@ -13,11 +13,16 @@ export default function WinScreen({ state }) {
       <div className="title-bar">
         <span>🎉 You Win! 🎉</span>
       </div>
-      <div className="window-body" style={{ textAlign: "center", padding: "2rem" }}>
+      <div
+        className="window-body"
+        style={{ textAlign: "center", padding: "2rem" }}
+      >
         <p>⭐⭐⭐⭐</p>
         <p>4-star party achieved!</p>
         <p>Night {24 - state.nightsLeft} of 24</p>
-        <p>Final pop: {state.popularity} | Cash: {state.cash}</p>
+        <p>
+          Final pop: {state.popularity} | Cash: {state.cash}
+        </p>
       </div>
     </div>
   );

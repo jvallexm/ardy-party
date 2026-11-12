@@ -99,10 +99,11 @@ export default function App({ initialState, initialCursor } = {}) {
     setRolodexOpen(false);
   };
 
-  const rolodexModalGuests = [...(state.driverMode
-    ? state.rolodex.filter((g) => !state.bannedThisParty.includes(g.id))
-    : state.rolodex
-  )].sort((a, b) => a.order - b.order);
+  const rolodexModalGuests = [
+    ...(state.driverMode
+      ? state.rolodex.filter((g) => !state.bannedThisParty.includes(g.id))
+      : state.rolodex),
+  ].sort((a, b) => a.order - b.order);
 
   useKeyboardNav({
     state,

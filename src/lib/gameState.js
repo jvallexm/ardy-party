@@ -241,7 +241,10 @@ export function confirmSummary(state) {
     nightsLeft: state.nightsLeft - 1,
     phase: "shop",
     rolodex: [...state.rolodex, ...state.house],
-    testShop: state.mode === "test" ? buildTestShop(undefined, state.purchasedCounts) : null,
+    testShop:
+      state.mode === "test"
+        ? buildTestShop(undefined, state.purchasedCounts)
+        : null,
   };
 }
 
@@ -267,7 +270,10 @@ export function blameGuest(state, guestId) {
     blameContext: null,
     driverMode: null,
     rolodex: [...state.rolodex, ...nextHouse],
-    testShop: state.mode === "test" ? buildTestShop(undefined, state.purchasedCounts) : null,
+    testShop:
+      state.mode === "test"
+        ? buildTestShop(undefined, state.purchasedCounts)
+        : null,
   };
 }
 
@@ -362,9 +368,7 @@ export function kickGuest(state, kickerId, targetId) {
 export function confirmDogReveal(state, choice) {
   const id = state.dogRevealGuestId;
   const bannedThisParty =
-    choice === "boot"
-      ? [...state.bannedThisParty, id]
-      : state.bannedThisParty;
+    choice === "boot" ? [...state.bannedThisParty, id] : state.bannedThisParty;
   return {
     ...state,
     bannedThisParty,

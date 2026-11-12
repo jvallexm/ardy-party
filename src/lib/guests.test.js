@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { GUEST_TYPES, SHOP_GUESTS, HOUSE_EXPANSION_COSTS, buildTestShop } from "./guests.js";
+import {
+  GUEST_TYPES,
+  SHOP_GUESTS,
+  HOUSE_EXPANSION_COSTS,
+  buildTestShop,
+} from "./guests.js";
 
 describe("GUEST_TYPES", () => {
   it("defines oldFriend", () => {
@@ -161,7 +166,14 @@ describe("buildTestShop", () => {
   });
 
   it("picks 3 from pool A (monkey/driver/securityGuard/ticketTaker/hippie/dog)", () => {
-    const poolA = ["monkey", "driver", "securityGuard", "ticketTaker", "hippie", "dog"];
+    const poolA = [
+      "monkey",
+      "driver",
+      "securityGuard",
+      "ticketTaker",
+      "hippie",
+      "dog",
+    ];
     const shop = buildTestShop(identityShuffle);
     const fromA = shop.filter((k) => poolA.includes(k));
     expect(fromA.length).toBe(3);
@@ -212,7 +224,13 @@ describe("buildTestShop", () => {
 
   it("null only appears when pool is fully exhausted", () => {
     // 5 of 6 pool A sold out → only dog available → 1 fills, 2 slots null
-    const purchasedCounts = { monkey: 4, driver: 4, securityGuard: 4, ticketTaker: 4, hippie: 4 };
+    const purchasedCounts = {
+      monkey: 4,
+      driver: 4,
+      securityGuard: 4,
+      ticketTaker: 4,
+      hippie: 4,
+    };
     const shop = buildTestShop(identityShuffle, purchasedCounts);
     expect(shop).not.toContain("monkey");
     expect(shop).not.toContain("driver");

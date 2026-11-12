@@ -17,7 +17,11 @@ describe("WinScreen", () => {
   });
 
   it("shows the night reached and final stats", () => {
-    render(<WinScreen state={baseState({ nightsLeft: 18, popularity: 45, cash: 12 })} />);
+    render(
+      <WinScreen
+        state={baseState({ nightsLeft: 18, popularity: 45, cash: 12 })}
+      />,
+    );
     expect(screen.getByText(/Night 6 of 24/)).toBeTruthy();
     expect(screen.getByText(/pop: 45/i)).toBeTruthy();
     expect(screen.getByText(/cash: 12/i)).toBeTruthy();

@@ -222,7 +222,9 @@ describe("Shop", () => {
       />,
     );
     expect(screen.getByRole("button", { name: /Sold Out/ })).toBeTruthy();
-    expect(screen.getByRole("button", { name: /Sold Out/ }).disabled).toBe(true);
+    expect(screen.getByRole("button", { name: /Sold Out/ }).disabled).toBe(
+      true,
+    );
   });
 
   it("applies focused class to guest tile at matching focusedIndex", () => {
@@ -285,14 +287,17 @@ describe("Shop", () => {
         focusedIndex={driverIdx}
       />,
     );
-    expect(
-      screen.getByText(GUEST_TYPES.driver.description),
-    ).toBeTruthy();
+    expect(screen.getByText(GUEST_TYPES.driver.description)).toBeTruthy();
   });
 
   it("shows guest description when hovering a guest tile", () => {
     render(
-      <Shop state={baseState()} onBuy={() => {}} onExpand={() => {}} onNext={() => {}} />,
+      <Shop
+        state={baseState()}
+        onBuy={() => {}}
+        onExpand={() => {}}
+        onNext={() => {}}
+      />,
     );
     fireEvent.mouseEnter(screen.getByRole("button", { name: /Driver/ }));
     expect(screen.getByText(GUEST_TYPES.driver.description)).toBeTruthy();
@@ -300,7 +305,12 @@ describe("Shop", () => {
 
   it("hides description when mouse leaves", () => {
     render(
-      <Shop state={baseState()} onBuy={() => {}} onExpand={() => {}} onNext={() => {}} />,
+      <Shop
+        state={baseState()}
+        onBuy={() => {}}
+        onExpand={() => {}}
+        onNext={() => {}}
+      />,
     );
     fireEvent.mouseEnter(screen.getByRole("button", { name: /Driver/ }));
     fireEvent.mouseLeave(screen.getByRole("button", { name: /Driver/ }));

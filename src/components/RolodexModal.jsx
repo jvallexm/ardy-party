@@ -49,7 +49,11 @@ export default function RolodexModal({
             {total} guest{total === 1 ? "" : "s"}
             {houseGuests.length > 0 ? ` (${houseGuests.length} at party)` : ""}
           </p>
-          <GuestGrid guests={sorted} onGuestClick={onGuestPick} focusedIndex={focusedIndex} />
+          <GuestGrid
+            guests={sorted}
+            onGuestClick={onGuestPick}
+            focusedIndex={focusedIndex}
+          />
           {sortedHouse.length > 0 && (
             <>
               <hr className="rolodex-separator" />

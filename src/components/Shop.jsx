@@ -42,10 +42,13 @@ export default function Shop({
   const isGameOver = state.nightsLeft === 0;
 
   const activeIndex = hoveredIndex !== -1 ? hoveredIndex : focusedIndex;
-  const activeKey = activeIndex >= 0 && activeIndex < shopGuests.length
-    ? shopGuests[activeIndex]
+  const activeKey =
+    activeIndex >= 0 && activeIndex < shopGuests.length
+      ? shopGuests[activeIndex]
+      : null;
+  const activeDescription = activeKey
+    ? GUEST_TYPES[activeKey]?.description
     : null;
-  const activeDescription = activeKey ? GUEST_TYPES[activeKey]?.description : null;
 
   return (
     <div className="window">
@@ -157,9 +160,7 @@ export default function Shop({
             </div>
           </div>
         </div>
-        <div className="shop-description">
-          {activeDescription || "\u00a0"}
-        </div>
+        <div className="shop-description">{activeDescription || "\u00a0"}</div>
       </div>
     </div>
   );

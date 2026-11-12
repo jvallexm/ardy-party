@@ -104,7 +104,8 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 4,
     maxPurchase: 4,
-    description: "Peek at the next rolodex guest. Keep or ban them for this party.",
+    description:
+      "Peek at the next rolodex guest. Keep or ban them for this party.",
   },
   hippie: {
     name: "Hippie",
@@ -225,7 +226,14 @@ function shuffleArray(arr) {
   return a;
 }
 
-const TEST_POOL_A = ["monkey", "driver", "securityGuard", "ticketTaker", "hippie", "dog"];
+const TEST_POOL_A = [
+  "monkey",
+  "driver",
+  "securityGuard",
+  "ticketTaker",
+  "hippie",
+  "dog",
+];
 const TEST_POOL_B = ["rockStar", "comedian", "caterer", "mrPopular"];
 const TEST_POOL_C = ["dancer", "auctioneer"];
 

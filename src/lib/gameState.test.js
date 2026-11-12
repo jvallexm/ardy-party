@@ -68,7 +68,10 @@ describe("createInitialState", () => {
   });
 
   it("defaults to classic mode with no testShop", () => {
-    const state = createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a });
+    const state = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+    });
     expect(state.mode).toBe("classic");
     expect(state.testShop).toBeNull();
   });
@@ -372,7 +375,10 @@ describe("confirmSummary", () => {
   });
 
   it("keeps testShop null in classic mode", () => {
-    const base = createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a });
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+    });
     const state = { ...base, house: [], phase: "summary" };
     const next = confirmSummary(state);
     expect(next.testShop).toBeNull();
@@ -425,16 +431,31 @@ describe("blameGuest", () => {
       mode: "test",
     });
     const house = [{ id: "a", type: "wildBuddy", abilityUsed: false }];
-    const state = { ...base, house, trouble: 3, phase: "blame", blameContext: "trouble" };
+    const state = {
+      ...base,
+      house,
+      trouble: 3,
+      phase: "blame",
+      blameContext: "trouble",
+    };
     const next = blameGuest(state, "a");
     expect(next.testShop).not.toBeNull();
     expect(next.testShop.length).toBe(9);
   });
 
   it("keeps testShop null in classic mode", () => {
-    const base = createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a });
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+    });
     const house = [{ id: "a", type: "wildBuddy", abilityUsed: false }];
-    const state = { ...base, house, trouble: 3, phase: "blame", blameContext: "trouble" };
+    const state = {
+      ...base,
+      house,
+      trouble: 3,
+      phase: "blame",
+      blameContext: "trouble",
+    };
     const next = blameGuest(state, "a");
     expect(next.testShop).toBeNull();
   });
@@ -501,7 +522,12 @@ describe("activateAbility", () => {
       shuffleFn: (a) => a,
     });
     const hippie = { id: "h1", type: "hippie", abilityUsed: false, order: 0 };
-    const wildBuddy = { id: "w1", type: "wildBuddy", abilityUsed: false, order: 1 };
+    const wildBuddy = {
+      id: "w1",
+      type: "wildBuddy",
+      abilityUsed: false,
+      order: 1,
+    };
     const state = {
       ...base,
       house: [hippie],
@@ -520,7 +546,12 @@ describe("activateAbility", () => {
       shuffleFn: (a) => a,
     });
     const hippie = { id: "h1", type: "hippie", abilityUsed: false, order: 0 };
-    const wildBuddy = { id: "w1", type: "wildBuddy", abilityUsed: false, order: 1 };
+    const wildBuddy = {
+      id: "w1",
+      type: "wildBuddy",
+      abilityUsed: false,
+      order: 1,
+    };
     const state = {
       ...base,
       house: [hippie],
@@ -552,7 +583,10 @@ describe("activateAbility", () => {
   });
 
   it("transitions to won phase when 4th alien enters the house", () => {
-    const base = createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a });
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+    });
     const aliens = [
       { id: "a1", type: "alien", abilityUsed: false, order: 0 },
       { id: "a2", type: "alien", abilityUsed: false, order: 1 },
@@ -571,14 +605,22 @@ describe("activateAbility", () => {
   });
 
   it("4th alien via autoInvite also triggers won", () => {
-    const base = createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a });
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+    });
     const aliens = [
       { id: "a1", type: "alien", abilityUsed: false, order: 0 },
       { id: "a2", type: "alien", abilityUsed: false, order: 1 },
       { id: "a3", type: "alien", abilityUsed: false, order: 2 },
       { id: "a4", type: "alien", abilityUsed: false, order: 3 },
     ];
-    const mrPop = { id: "mp1", type: "mrPopular", abilityUsed: false, order: 4 };
+    const mrPop = {
+      id: "mp1",
+      type: "mrPopular",
+      abilityUsed: false,
+      order: 4,
+    };
     const state = {
       ...base,
       house: aliens.slice(0, 3),
@@ -740,19 +782,35 @@ describe("kickGuest", () => {
   });
 
   it("returns kicked guest to rolodex so they come back next party", () => {
-    const base = createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a });
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+    });
     const guard = { id: "g1", type: "securityGuard", abilityUsed: false };
     const target = { id: "t1", type: "wildBuddy", abilityUsed: false };
-    const state = { ...base, house: [guard, target], rolodex: [], kickMode: { kickerId: "g1" } };
+    const state = {
+      ...base,
+      house: [guard, target],
+      rolodex: [],
+      kickMode: { kickerId: "g1" },
+    };
     const result = kickGuest(state, "g1", "t1");
     expect(result.rolodex.find((g) => g.id === "t1")).toBeDefined();
     expect(result.bannedThisParty).toContain("t1");
   });
 
   it("does not modify rolodex when target is not found in house", () => {
-    const base = createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a });
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+    });
     const guard = { id: "g1", type: "securityGuard", abilityUsed: false };
-    const state = { ...base, house: [guard], rolodex: [], kickMode: { kickerId: "g1" } };
+    const state = {
+      ...base,
+      house: [guard],
+      rolodex: [],
+      kickMode: { kickerId: "g1" },
+    };
     const result = kickGuest(state, "g1", "unknown-id");
     expect(result.rolodex).toEqual([]);
   });
