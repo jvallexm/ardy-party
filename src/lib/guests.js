@@ -120,7 +120,7 @@ export const GUEST_TYPES = {
     shopCost: 4,
     maxPurchase: 4,
     description:
-      "+1 popularity. Automatically reduces trouble by 1 when they arrive.",
+      "While at the party, raises the trouble limit by 1 — you can have one more troublemaker before the blame phase triggers.",
   },
   auctioneer: {
     name: "Auctioneer",

@@ -438,38 +438,42 @@ describe("activateAbility", () => {
     expect(result).toBe(state);
   });
 
-  it("hippie passively reduces trouble by 1 when added to party", () => {
+  it("hippie in house raises trouble threshold so 3 trouble guests do not trigger blame", () => {
     const base = createInitialState({
       idGen: makeIdGen(),
       shuffleFn: (a) => a,
     });
     const hippie = { id: "h1", type: "hippie", abilityUsed: false, order: 0 };
+    const wildBuddy = { id: "w1", type: "wildBuddy", abilityUsed: false, order: 1 };
     const state = {
       ...base,
-      house: [],
-      rolodex: [hippie],
+      house: [hippie],
+      rolodex: [wildBuddy],
       trouble: 2,
       houseCapacity: 5,
     };
-    const result = addGuestToParty(state, "h1");
-    expect(result.trouble).toBe(1);
+    const result = addGuestToParty(state, "w1");
+    expect(result.trouble).toBe(3);
+    expect(result.phase).toBe("party");
   });
 
-  it("hippie trouble floors at 0 on arrival", () => {
+  it("hippie does not prevent blame when trouble reaches threshold + hippieCount", () => {
     const base = createInitialState({
       idGen: makeIdGen(),
       shuffleFn: (a) => a,
     });
     const hippie = { id: "h1", type: "hippie", abilityUsed: false, order: 0 };
+    const wildBuddy = { id: "w1", type: "wildBuddy", abilityUsed: false, order: 1 };
     const state = {
       ...base,
-      house: [],
-      rolodex: [hippie],
-      trouble: 0,
+      house: [hippie],
+      rolodex: [wildBuddy],
+      trouble: 3,
       houseCapacity: 5,
     };
-    const result = addGuestToParty(state, "h1");
-    expect(result.trouble).toBe(0);
+    const result = addGuestToParty(state, "w1");
+    expect(result.trouble).toBe(4);
+    expect(result.phase).toBe("blame");
   });
 
   it("hippie filling last house slot auto-ends the party", () => {

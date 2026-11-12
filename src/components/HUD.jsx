@@ -16,6 +16,8 @@ import { countStars } from "../lib/gameState.js";
  */
 export default function HUD({ state, onEndParty, endPartyFocused = false }) {
   const stars = countStars(state.house);
+  const hippieCount = state.house.filter((g) => g.type === "hippie").length;
+  const effectiveTrouble = Math.max(0, state.trouble - hippieCount);
   return (
     <div className="window">
       <div className="title-bar hud-bar">
@@ -25,7 +27,7 @@ export default function HUD({ state, onEndParty, endPartyFocused = false }) {
           {[0, 1, 2].map((i) => (
             <span
               key={i}
-              className={`trouble-x${i < state.trouble ? "" : " off"}`}
+              className={`trouble-x${i < effectiveTrouble ? "" : " off"}`}
             >
               ❌
             </span>
