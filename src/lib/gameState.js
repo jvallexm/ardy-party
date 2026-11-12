@@ -1,4 +1,4 @@
-import { GUEST_TYPES, HOUSE_EXPANSION_COSTS } from "./guests.js";
+import { GUEST_TYPES, HOUSE_EXPANSION_COSTS, buildTestShop } from "./guests.js";
 
 const MAX_CASH = 30;
 const MAX_POPULARITY = 60;
@@ -27,6 +27,7 @@ function makeGuest(type, id, order) {
 export function createInitialState({
   idGen = defaultIdGen,
   shuffleFn = shuffleArray,
+  mode = "classic",
 } = {}) {
   const rolodex = [];
   for (let i = 0; i < 4; i++)
@@ -50,6 +51,8 @@ export function createInitialState({
     houseCostIndex: 0,
     purchasedCounts: {},
     nextOrder: rolodex.length,
+    mode,
+    testShop: mode === "test" ? buildTestShop(shuffleFn) : null,
   };
 }
 

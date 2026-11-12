@@ -8,7 +8,7 @@ import SummaryModal from "./components/SummaryModal.jsx";
 import Shop from "./components/Shop.jsx";
 import BlamePicker from "./components/BlamePicker.jsx";
 import PeekNextGuest from "./components/PeekNextGuest.jsx";
-import { GUEST_TYPES } from "./lib/guests.js";
+import { GUEST_TYPES, SHOP_GUESTS } from "./lib/guests.js";
 import {
   createInitialState,
   addGuestToParty,
@@ -125,6 +125,8 @@ export default function App({ initialState, initialCursor } = {}) {
     );
   }
 
+  const shopGuests = state.testShop ?? SHOP_GUESTS;
+
   if (state.phase === "shop") {
     return (
       <>
@@ -135,6 +137,7 @@ export default function App({ initialState, initialCursor } = {}) {
           onNext={handleNext}
           onOpenRolodex={() => setRolodexOpen(true)}
           focusedIndex={shopCursor}
+          shopGuests={shopGuests}
         />
         <RolodexModal
           open={rolodexOpen}

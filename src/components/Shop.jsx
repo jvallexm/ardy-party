@@ -33,6 +33,7 @@ export default function Shop({
   onNext,
   onOpenRolodex,
   focusedIndex = -1,
+  shopGuests = SHOP_GUESTS,
 }) {
   const expandCost = HOUSE_EXPANSION_COSTS(state.houseCostIndex);
   const expandDisabled =
@@ -50,7 +51,7 @@ export default function Shop({
           <span className="hud-item">Cash: {state.cash}/30</span>
         </div>
         <div className="shop-grid">
-          {SHOP_GUESTS.map((key, i) => {
+          {shopGuests.map((key, i) => {
             const def = GUEST_TYPES[key];
             const purchased = state.purchasedCounts[key] || 0;
             const isUnlimited = def.maxPurchase === Infinity;
@@ -88,7 +89,7 @@ export default function Shop({
             <button
               type="button"
               aria-label={`Expand House ($${expandCost} cash)`}
-              className={`shop-tile${focusedIndex === SHOP_GUESTS.length ? " focused" : ""}`}
+              className={`shop-tile${focusedIndex === shopGuests.length ? " focused" : ""}`}
               onClick={onExpand}
               disabled={expandDisabled}
             >
@@ -120,7 +121,7 @@ export default function Shop({
             <button
               type="button"
               aria-label={isGameOver ? "Game Over" : "Start Next Party"}
-              className={`shop-tile${focusedIndex === SHOP_GUESTS.length + 1 ? " focused" : ""}`}
+              className={`shop-tile${focusedIndex === shopGuests.length + 1 ? " focused" : ""}`}
               onClick={onNext}
               disabled={isGameOver}
             >

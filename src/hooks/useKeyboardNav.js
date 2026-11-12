@@ -103,7 +103,8 @@ export default function useKeyboardNav({
       }
 
       if (phase === "shop") {
-        const totalItems = SHOP_GUESTS.length + 2;
+        const shopGuests = state.testShop ?? SHOP_GUESTS;
+        const totalItems = shopGuests.length + 2;
         let next = shopCursor;
         if (e.key === "a" || e.key === "A" || e.key === "ArrowLeft")
           next = shopCursor === 0 ? totalItems - 1 : shopCursor - 1;
@@ -115,9 +116,9 @@ export default function useKeyboardNav({
           next = Math.min(totalItems - 1, shopCursor + COLS);
         else if (e.key === " ") {
           e.preventDefault();
-          if (shopCursor < SHOP_GUESTS.length)
-            handleBuy(SHOP_GUESTS[shopCursor]);
-          else if (shopCursor === SHOP_GUESTS.length) handleExpand();
+          if (shopCursor < shopGuests.length)
+            handleBuy(shopGuests[shopCursor]);
+          else if (shopCursor === shopGuests.length) handleExpand();
           else handleNext();
           return;
         }

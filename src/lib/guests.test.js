@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { GUEST_TYPES, SHOP_GUESTS, HOUSE_EXPANSION_COSTS } from "./guests.js";
+import { GUEST_TYPES, SHOP_GUESTS, HOUSE_EXPANSION_COSTS, buildTestShop } from "./guests.js";
 
 describe("GUEST_TYPES", () => {
   it("defines oldFriend", () => {
@@ -136,6 +136,70 @@ describe("SHOP_GUESTS", () => {
       const curr = GUEST_TYPES[SHOP_GUESTS[i]].shopCost;
       expect(curr).toBeGreaterThanOrEqual(prev);
     }
+  });
+});
+
+describe("buildTestShop", () => {
+  const identityShuffle = (a) => a;
+
+  it("always includes oldFriend, richPal, and alien", () => {
+    const shop = buildTestShop(identityShuffle);
+    expect(shop).toContain("oldFriend");
+    expect(shop).toContain("richPal");
+    expect(shop).toContain("alien");
+  });
+
+  it("contains exactly 9 entries", () => {
+    const shop = buildTestShop(identityShuffle);
+    expect(shop.length).toBe(9);
+  });
+
+  it("contains no duplicates", () => {
+    const shop = buildTestShop(identityShuffle);
+    expect(new Set(shop).size).toBe(shop.length);
+  });
+
+  it("picks 3 from pool A (monkey/driver/securityGuard/ticketTaker/hippie/dog)", () => {
+    const poolA = ["monkey", "driver", "securityGuard", "ticketTaker", "hippie", "dog"];
+    const shop = buildTestShop(identityShuffle);
+    const fromA = shop.filter((k) => poolA.includes(k));
+    expect(fromA.length).toBe(3);
+  });
+
+  it("picks 2 from pool B (rockStar/comedian/caterer/mrPopular)", () => {
+    const poolB = ["rockStar", "comedian", "caterer", "mrPopular"];
+    const shop = buildTestShop(identityShuffle);
+    const fromB = shop.filter((k) => poolB.includes(k));
+    expect(fromB.length).toBe(2);
+  });
+
+  it("picks 1 from pool C (dancer/auctioneer)", () => {
+    const poolC = ["dancer", "auctioneer"];
+    const shop = buildTestShop(identityShuffle);
+    const fromC = shop.filter((k) => poolC.includes(k));
+    expect(fromC.length).toBe(1);
+  });
+
+  it("is sorted by shopCost ascending", () => {
+    const shop = buildTestShop(identityShuffle);
+    for (let i = 1; i < shop.length; i++) {
+      expect(GUEST_TYPES[shop[i]].shopCost).toBeGreaterThanOrEqual(
+        GUEST_TYPES[shop[i - 1]].shopCost,
+      );
+    }
+  });
+
+  it("uses shuffleFn to randomize pool selection", () => {
+    const reverseShuffle = (a) => [...a].reverse();
+    const shop = buildTestShop(reverseShuffle);
+    expect(shop.length).toBe(9);
+    expect(new Set(shop).size).toBe(9);
+  });
+
+  it("works with the default shuffle (no shuffleFn argument)", () => {
+    const shop = buildTestShop();
+    expect(shop.length).toBe(9);
+    expect(new Set(shop).size).toBe(9);
   });
 });
 

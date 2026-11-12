@@ -66,6 +66,23 @@ describe("createInitialState", () => {
     expect(state.dogRevealGuestId).toBeNull();
     expect(state.blameContext).toBeNull();
   });
+
+  it("defaults to classic mode with no testShop", () => {
+    const state = createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a });
+    expect(state.mode).toBe("classic");
+    expect(state.testShop).toBeNull();
+  });
+
+  it("test mode generates a testShop with 9 entries", () => {
+    const state = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+      mode: "test",
+    });
+    expect(state.mode).toBe("test");
+    expect(state.testShop).not.toBeNull();
+    expect(state.testShop.length).toBe(9);
+  });
 });
 
 describe("addGuestToParty", () => {

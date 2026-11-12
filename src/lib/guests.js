@@ -221,6 +221,45 @@ export const SHOP_GUESTS = Object.keys(GUEST_TYPES)
   .filter((key) => GUEST_TYPES[key].shopCost !== null)
   .sort((a, b) => GUEST_TYPES[a].shopCost - GUEST_TYPES[b].shopCost);
 
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+const TEST_POOL_A = ["monkey", "driver", "securityGuard", "ticketTaker", "hippie", "dog"];
+const TEST_POOL_B = ["rockStar", "comedian", "caterer", "mrPopular"];
+const TEST_POOL_C = ["dancer", "auctioneer"];
+
+/**
+ * Builds the randomized shop list for Test Mode.
+ *
+ * Always includes oldFriend, richPal, and alien. Randomly picks 3 from pool A
+ * (monkey/driver/securityGuard/ticketTaker/hippie/dog), 2 from pool B
+ * (rockStar/comedian/caterer/mrPopular), and 1 from pool C (dancer/auctioneer).
+ * Result is sorted by shopCost ascending.
+ *
+ * @param {function} [shuffleFn] - Array shuffle function; defaults to Fisher-Yates.
+ * @returns {string[]} Array of guest type keys for the test mode shop.
+ * @example
+ * buildTestShop((a) => a); // deterministic: first 3 from A, first 2 from B, first from C
+ */
+export function buildTestShop(shuffleFn = shuffleArray) {
+  const pick = (pool, n) => shuffleFn([...pool]).slice(0, n);
+  const selected = [
+    "oldFriend",
+    "richPal",
+    "alien",
+    ...pick(TEST_POOL_A, 3),
+    ...pick(TEST_POOL_B, 2),
+    ...pick(TEST_POOL_C, 1),
+  ];
+  return selected.sort((a, b) => GUEST_TYPES[a].shopCost - GUEST_TYPES[b].shopCost);
+}
+
 /**
  * Returns the cash cost of the next house expansion.
  *
