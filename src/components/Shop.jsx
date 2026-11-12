@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   SHOP_GUESTS,
   GUEST_TYPES,
@@ -35,10 +35,17 @@ export default function Shop({
   focusedIndex = -1,
   shopGuests = SHOP_GUESTS,
 }) {
+  const [hoveredIndex, setHoveredIndex] = useState(-1);
   const expandCost = HOUSE_EXPANSION_COSTS(state.houseCostIndex);
   const expandDisabled =
     state.cash < expandCost || state.houseCapacity >= MAX_CAPACITY;
   const isGameOver = state.nightsLeft === 0;
+
+  const activeIndex = hoveredIndex !== -1 ? hoveredIndex : focusedIndex;
+  const activeKey = activeIndex >= 0 && activeIndex < shopGuests.length
+    ? shopGuests[activeIndex]
+    : null;
+  const activeDescription = activeKey ? GUEST_TYPES[activeKey]?.description : null;
 
   return (
     <div className="window">
@@ -76,14 +83,13 @@ export default function Shop({
               state.popularity < def.shopCost || purchased >= def.maxPurchase;
             return (
               <div key={key} className="shop-item">
-                {def.description && (
-                  <span className="shop-tooltip">{def.description}</span>
-                )}
                 <button
                   type="button"
                   aria-label={def.name}
                   className={`shop-tile${focusedIndex === i ? " focused" : ""}`}
                   onClick={() => onBuy(key)}
+                  onMouseEnter={() => setHoveredIndex(i)}
+                  onMouseLeave={() => setHoveredIndex(-1)}
                   disabled={disabled}
                 >
                   <TileVisuals
@@ -123,7 +129,7 @@ export default function Shop({
             <button
               type="button"
               aria-label="Open Rolodex"
-              className="shop-tile"
+              className={`shop-tile${focusedIndex === shopGuests.length + 1 ? " focused" : ""}`}
               onClick={onOpenRolodex}
             >
               📒
@@ -138,7 +144,7 @@ export default function Shop({
             <button
               type="button"
               aria-label={isGameOver ? "Game Over" : "Start Next Party"}
-              className={`shop-tile${focusedIndex === shopGuests.length + 1 ? " focused" : ""}`}
+              className={`shop-tile${focusedIndex === shopGuests.length + 2 ? " focused" : ""}`}
               onClick={onNext}
               disabled={isGameOver}
             >
@@ -150,6 +156,9 @@ export default function Shop({
               </div>
             </div>
           </div>
+        </div>
+        <div className="shop-description">
+          {activeDescription || "\u00a0"}
         </div>
       </div>
     </div>

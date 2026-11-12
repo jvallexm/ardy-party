@@ -269,25 +269,13 @@ body {
   position: relative;
 }
 
-.shop-tooltip {
-  display: none;
-  position: absolute;
-  bottom: calc(100% + 4px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: #000080;
-  color: #fff;
-  font-size: 11px;
+.shop-description {
+  min-height: 1.4em;
   padding: 4px 6px;
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 10;
-  border: 1px solid #fff;
-}
-
-.shop-item:hover .shop-tooltip,
-.shop-item:focus-within .shop-tooltip {
-  display: block;
+  font-size: 11px;
+  color: #000080;
+  border-top: 1px solid #808080;
+  margin-top: 4px;
 }
 
 .shop-tile {

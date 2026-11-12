@@ -82,6 +82,7 @@ describe("GUEST_TYPES", () => {
     expect(g.cashBonus).toBe(2);
     expect(g.trouble).toBe(true);
     expect(g.shopCost).toBe(5);
+    expect(g.description).toBeNull();
   });
 
   it("defines comedian", () => {
@@ -201,28 +202,22 @@ describe("buildTestShop", () => {
     expect(shop.length).toBe(9);
   });
 
-  it("excludes sold-out guests and fills remaining slots with null", () => {
-    // identity shuffle picks monkey, driver, securityGuard from pool A — all sold out → 3 nulls
+  it("fills sold-out slot with an available guest — no null when pool has replacements", () => {
+    // monkey is sold out, but driver/securityGuard/ticketTaker/hippie/dog are available
+    const purchasedCounts = { monkey: 4 };
+    const shop = buildTestShop(identityShuffle, purchasedCounts);
+    expect(shop).not.toContain("monkey");
+    expect(shop).not.toContain(null);
+  });
+
+  it("null only appears when pool is fully exhausted", () => {
+    // 5 of 6 pool A sold out → only dog available → 1 fills, 2 slots null
     const purchasedCounts = { monkey: 4, driver: 4, securityGuard: 4, ticketTaker: 4, hippie: 4 };
     const shop = buildTestShop(identityShuffle, purchasedCounts);
     expect(shop).not.toContain("monkey");
     expect(shop).not.toContain("driver");
     expect(shop.length).toBe(9);
-    expect(shop.filter((k) => k === null).length).toBe(3);
-  });
-
-  it("null appears in the sold-out guest's cost position, not at the end", () => {
-    // identity shuffle picks monkey first from pool A (cost $4)
-    // monkey is sold out → that slot should be null at the $4 position
-    // alien ($40) must still appear last, not displaced
-    const purchasedCounts = { monkey: 4 };
-    const shop = buildTestShop(identityShuffle, purchasedCounts);
-    // null should exist
-    expect(shop).toContain(null);
-    // alien must be last (cost $40 > null's $4 position)
-    expect(shop[shop.length - 1]).toBe("alien");
-    // null must not be last
-    expect(shop.indexOf(null)).toBeLessThan(shop.length - 1);
+    expect(shop.filter((k) => k === null).length).toBe(2);
   });
 
   it("marks always-slot as null when sold out", () => {

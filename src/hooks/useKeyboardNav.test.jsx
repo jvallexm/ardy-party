@@ -647,6 +647,28 @@ describe("App - keyboard navigation", () => {
     expect(screen.getByText(/10 Nights remaining/)).toBeTruthy();
   });
 
+  it("Space on Open Rolodex tile in shop opens rolodex modal", () => {
+    // testShop with 2 items → expand at index 2, rolodex at index 3, start at index 4
+    const s = freshState({
+      phase: "shop",
+      testShop: ["oldFriend", "richPal"],
+      mode: "test",
+      nightsLeft: 10,
+      cash: 0,
+      popularity: 0,
+      rolodex: [{ id: "r1", type: "oldFriend", abilityUsed: false, order: 0 }],
+      houseCapacity: 5,
+      houseCostIndex: 0,
+      purchasedCounts: {},
+      bannedThisParty: [],
+      house: [],
+    });
+    render(<App initialState={s} />);
+    press("d"); press("d"); press("d"); // cursor 0→1→2→3 (rolodex tile)
+    press(" ");
+    expect(screen.getByRole("button", { name: /close/i })).toBeTruthy();
+  });
+
   it("rolodex tile in shop opens and closes modal", () => {
     const s = shopState({
       rolodex: [{ id: "r1", type: "oldFriend", abilityUsed: false }],

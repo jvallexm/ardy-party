@@ -119,6 +119,7 @@ export default function App({ initialState, initialCursor } = {}) {
     setRolodexCursor,
     rolodexGuests: rolodexModalGuests,
     handleRolodexPick: state.driverMode ? handleDriverPick : undefined,
+    handleOpenRolodex: () => setRolodexOpen(true),
     handleConfirmSummary,
     handleBlame,
     handleBuy,

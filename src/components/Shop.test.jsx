@@ -264,7 +264,7 @@ describe("Shop", () => {
         onBuy={() => {}}
         onExpand={() => {}}
         onNext={() => {}}
-        focusedIndex={SHOP_GUESTS.length + 1}
+        focusedIndex={SHOP_GUESTS.length + 2}
       />,
     );
     expect(
@@ -272,5 +272,58 @@ describe("Shop", () => {
         .getByRole("button", { name: /Start Next Party/ })
         .classList.contains("focused"),
     ).toBe(true);
+  });
+
+  it("shows guest description below shop when that guest tile is focused by keyboard", () => {
+    const driverIdx = SHOP_GUESTS.indexOf("driver");
+    render(
+      <Shop
+        state={baseState()}
+        onBuy={() => {}}
+        onExpand={() => {}}
+        onNext={() => {}}
+        focusedIndex={driverIdx}
+      />,
+    );
+    expect(
+      screen.getByText(GUEST_TYPES.driver.description),
+    ).toBeTruthy();
+  });
+
+  it("shows guest description when hovering a guest tile", () => {
+    render(
+      <Shop state={baseState()} onBuy={() => {}} onExpand={() => {}} onNext={() => {}} />,
+    );
+    fireEvent.mouseEnter(screen.getByRole("button", { name: /Driver/ }));
+    expect(screen.getByText(GUEST_TYPES.driver.description)).toBeTruthy();
+  });
+
+  it("hides description when mouse leaves", () => {
+    render(
+      <Shop state={baseState()} onBuy={() => {}} onExpand={() => {}} onNext={() => {}} />,
+    );
+    fireEvent.mouseEnter(screen.getByRole("button", { name: /Driver/ }));
+    fireEvent.mouseLeave(screen.getByRole("button", { name: /Driver/ }));
+    expect(screen.queryByText(GUEST_TYPES.driver.description)).toBeNull();
+  });
+
+  it("description is rendered outside of individual shop-item (below the grid)", () => {
+    const driverIdx = SHOP_GUESTS.indexOf("driver");
+    const { container } = render(
+      <Shop
+        state={baseState()}
+        onBuy={() => {}}
+        onExpand={() => {}}
+        onNext={() => {}}
+        focusedIndex={driverIdx}
+      />,
+    );
+    // description panel should not be a child of any .shop-item
+    const shopItems = container.querySelectorAll(".shop-item");
+    shopItems.forEach((item) => {
+      expect(item.textContent).not.toContain(GUEST_TYPES.driver.description);
+    });
+    // but it should exist somewhere in the component
+    expect(screen.getByText(GUEST_TYPES.driver.description)).toBeTruthy();
   });
 });

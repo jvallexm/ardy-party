@@ -52,8 +52,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 3,
     maxPurchase: 4,
-    description:
-      "Click to open your rolodex and directly invite any guest of your choice",
+    description: "Invite any guest directly from your rolodex.",
   },
   monkey: {
     name: "Monkey",
@@ -79,7 +78,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 4,
     maxPurchase: 4,
-    description: "Click to remove any guest from the party",
+    description: "Remove any guest from the party.",
   },
   ticketTaker: {
     name: "Ticket Taker",
@@ -105,8 +104,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 4,
     maxPurchase: 4,
-    description:
-      "Click to preview the next guest in your rolodex — you can keep them or turn them away for the rest of this party.",
+    description: "Peek at the next rolodex guest. Keep or ban them for this party.",
   },
   hippie: {
     name: "Hippie",
@@ -119,8 +117,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 4,
     maxPurchase: 4,
-    description:
-      "While at the party, raises the trouble limit by 1 — you can have one more troublemaker before the blame phase triggers.",
+    description: "+1 trouble limit while at the party.",
   },
   auctioneer: {
     name: "Auctioneer",
@@ -146,7 +143,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 5,
     maxPurchase: 4,
-    description: "+2 cash but adds 1 trouble.",
+    description: null,
   },
   comedian: {
     name: "Comedian",
@@ -159,7 +156,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 5,
     maxPurchase: 4,
-    description: "+5 popularity at end of night when there is a full house.",
+    description: "+5 pop at end of night if house is full.",
   },
   caterer: {
     name: "Caterer",
@@ -185,8 +182,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 5,
     maxPurchase: 4,
-    description:
-      "When this guest enters the party, one additional guest is automatically invited from your rolodex.",
+    description: "Auto-invites one more guest on arrival.",
   },
   dancer: {
     name: "Dancer",
@@ -199,8 +195,7 @@ export const GUEST_TYPES = {
     hasStar: false,
     shopCost: 7,
     maxPurchase: 4,
-    description:
-      "Popularity scales as dancer count squared: 1 dancer = +1, 2 = +4, 3 = +9, 4 = +16.",
+    description: "1=+1 pop, 2=+4, 3=+9, 4=+16 (stacks with other dancers).",
   },
   alien: {
     name: "Alien",
@@ -251,23 +246,31 @@ const TEST_POOL_C = ["dancer", "auctioneer"];
  * buildTestShop((a) => a, { monkey: 4, driver: 4, securityGuard: 4 }); // some nulls
  */
 export function buildTestShop(shuffleFn = shuffleArray, purchasedCounts = {}) {
-  const isSoldOut = (key) =>
-    (purchasedCounts[key] || 0) >= GUEST_TYPES[key].maxPurchase;
+  const available = (key) =>
+    (purchasedCounts[key] || 0) < GUEST_TYPES[key].maxPurchase;
 
-  const pickN = (pool, n) => shuffleFn([...pool]).slice(0, n);
+  const pickN = (pool, n) => {
+    const avail = shuffleFn(pool.filter(available));
+    const picks = avail.slice(0, n);
+    return [...picks, ...Array(Math.max(0, n - picks.length)).fill(null)];
+  };
 
-  const selected = [
-    "oldFriend",
-    "richPal",
-    "alien",
+  const alwaysSlots = ["oldFriend", "richPal", "alien"].map((k) =>
+    available(k) ? k : null,
+  );
+
+  const slots = [
+    ...alwaysSlots,
     ...pickN(TEST_POOL_A, 3),
     ...pickN(TEST_POOL_B, 2),
     ...pickN(TEST_POOL_C, 1),
   ];
 
-  selected.sort((a, b) => GUEST_TYPES[a].shopCost - GUEST_TYPES[b].shopCost);
-
-  return selected.map((k) => (isSoldOut(k) ? null : k));
+  return slots.sort((a, b) => {
+    const costA = a ? GUEST_TYPES[a].shopCost : Infinity;
+    const costB = b ? GUEST_TYPES[b].shopCost : Infinity;
+    return costA - costB;
+  });
 }
 
 /**

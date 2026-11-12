@@ -29,6 +29,7 @@ const COLS = 9;
  * @param {function} opts.handleExpand - Callback to expand house capacity.
  * @param {function} opts.handleNext - Callback to start the next party.
  * @param {function} opts.handleEndParty - Callback to end the current party early.
+ * @param {function} opts.handleOpenRolodex - Callback to open the rolodex modal from the shop.
  * @param {function} opts.handleDoor - Callback to invite the next rolodex guest via the door.
  * @param {function} opts.handleGuestClick - Callback invoked with a guest object when activated.
  * @param {number} opts.rolodexCursor - Index of the focused guest inside the rolodex modal.
@@ -51,6 +52,7 @@ export default function useKeyboardNav({
   setRolodexCursor,
   rolodexGuests,
   handleRolodexPick,
+  handleOpenRolodex,
   handleConfirmSummary,
   handleBlame,
   handleBuy,
@@ -133,7 +135,7 @@ export default function useKeyboardNav({
 
       if (phase === "shop") {
         const shopGuests = state.testShop ?? SHOP_GUESTS;
-        const totalItems = shopGuests.length + 2;
+        const totalItems = shopGuests.length + 3;
         let next = shopCursor;
         if (e.key === "a" || e.key === "A" || e.key === "ArrowLeft")
           next = shopCursor === 0 ? totalItems - 1 : shopCursor - 1;
@@ -149,6 +151,7 @@ export default function useKeyboardNav({
             const key = shopGuests[shopCursor];
             if (key !== null) handleBuy(key);
           } else if (shopCursor === shopGuests.length) handleExpand();
+          else if (shopCursor === shopGuests.length + 1) handleOpenRolodex();
           else handleNext();
           return;
         }
