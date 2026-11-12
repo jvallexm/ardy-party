@@ -8,6 +8,7 @@ import SummaryModal from "./components/SummaryModal.jsx";
 import Shop from "./components/Shop.jsx";
 import BlamePicker from "./components/BlamePicker.jsx";
 import PeekNextGuest from "./components/PeekNextGuest.jsx";
+import WinScreen from "./components/WinScreen.jsx";
 import { GUEST_TYPES, SHOP_GUESTS } from "./lib/guests.js";
 import {
   createInitialState,
@@ -43,6 +44,7 @@ export default function App({ initialState, initialCursor } = {}) {
     () => initialState || createInitialState(),
   );
   const [rolodexOpen, setRolodexOpen] = useState(false);
+  const [rolodexCursor, setRolodexCursor] = useState(0);
   const [cursor, setCursor] = useState(
     () => initialCursor || { row: 0, col: 1 },
   );
@@ -77,6 +79,10 @@ export default function App({ initialState, initialCursor } = {}) {
     if (state.driverMode) setRolodexOpen(true);
   }, [state.driverMode]);
 
+  useEffect(() => {
+    if (rolodexOpen) setRolodexCursor(0);
+  }, [rolodexOpen]);
+
   const handleEndParty = () => setState(endParty(state));
   const handleConfirmSummary = () => setState(confirmSummary(state));
   const handleBlame = (id) => setState(blameGuest(state, id));
@@ -93,6 +99,11 @@ export default function App({ initialState, initialCursor } = {}) {
     setRolodexOpen(false);
   };
 
+  const rolodexModalGuests = [...(state.driverMode
+    ? state.rolodex.filter((g) => !state.bannedThisParty.includes(g.id))
+    : state.rolodex
+  )].sort((a, b) => a.order - b.order);
+
   useKeyboardNav({
     state,
     setState,
@@ -104,6 +115,10 @@ export default function App({ initialState, initialCursor } = {}) {
     setShopCursor,
     rolodexOpen,
     setRolodexOpen,
+    rolodexCursor,
+    setRolodexCursor,
+    rolodexGuests: rolodexModalGuests,
+    handleRolodexPick: state.driverMode ? handleDriverPick : undefined,
     handleConfirmSummary,
     handleBlame,
     handleBuy,
@@ -113,6 +128,10 @@ export default function App({ initialState, initialCursor } = {}) {
     handleDoor,
     handleGuestClick,
   });
+
+  if (state.phase === "won") {
+    return <WinScreen state={state} />;
+  }
 
   if (state.phase === "blame") {
     return (
@@ -143,6 +162,7 @@ export default function App({ initialState, initialCursor } = {}) {
           open={rolodexOpen}
           rolodex={state.rolodex}
           onClose={() => setRolodexOpen(false)}
+          focusedIndex={rolodexCursor}
         />
       </>
     );
@@ -189,6 +209,7 @@ export default function App({ initialState, initialCursor } = {}) {
           houseGuests={state.driverMode ? [] : state.house}
           onClose={handleRolodexClose}
           onGuestPick={state.driverMode ? handleDriverPick : undefined}
+          focusedIndex={rolodexCursor}
         />
         {state.phase === "dogReveal" && (
           <PeekNextGuest guest={revealedGuest} onChoose={handleDog} />

@@ -106,7 +106,7 @@ export const GUEST_TYPES = {
     shopCost: 4,
     maxPurchase: 4,
     description:
-      "Click to preview the next guest in your rolodex — you can keep them or permanently remove them from your roster.",
+      "Click to preview the next guest in your rolodex — you can keep them or turn them away for the rest of this party.",
   },
   hippie: {
     name: "Hippie",
@@ -237,42 +237,52 @@ const TEST_POOL_C = ["dancer", "auctioneer"];
 /**
  * Builds the randomized shop list for Test Mode.
  *
- * Always includes oldFriend, richPal, and alien. Randomly picks 3 from pool A
- * (monkey/driver/securityGuard/ticketTaker/hippie/dog), 2 from pool B
- * (rockStar/comedian/caterer/mrPopular), and 1 from pool C (dancer/auctioneer).
- * Result is sorted by shopCost ascending.
+ * Always includes oldFriend, richPal, and alien (unless sold out). Randomly picks
+ * 3 from pool A, 2 from pool B, and 1 from pool C — skipping any guest type whose
+ * purchasedCounts has reached maxPurchase. Slots that cannot be filled are returned
+ * as null ("Sold Out"). The full 9-element array is sorted by shopCost ascending,
+ * with nulls sorted as Infinity so they appear after available guests.
  *
  * @param {function} [shuffleFn] - Array shuffle function; defaults to Fisher-Yates.
- * @returns {string[]} Array of guest type keys for the test mode shop.
+ * @param {object} [purchasedCounts] - Map of guest type key to number purchased so far.
+ * @returns {Array<string|null>} 9-element array; null entries represent sold-out slots.
  * @example
- * buildTestShop((a) => a); // deterministic: first 3 from A, first 2 from B, first from C
+ * buildTestShop((a) => a, {}); // deterministic, nothing sold out
+ * buildTestShop((a) => a, { monkey: 4, driver: 4, securityGuard: 4 }); // some nulls
  */
-export function buildTestShop(shuffleFn = shuffleArray) {
-  const pick = (pool, n) => shuffleFn([...pool]).slice(0, n);
+export function buildTestShop(shuffleFn = shuffleArray, purchasedCounts = {}) {
+  const isSoldOut = (key) =>
+    (purchasedCounts[key] || 0) >= GUEST_TYPES[key].maxPurchase;
+
+  const pickN = (pool, n) => shuffleFn([...pool]).slice(0, n);
+
   const selected = [
     "oldFriend",
     "richPal",
     "alien",
-    ...pick(TEST_POOL_A, 3),
-    ...pick(TEST_POOL_B, 2),
-    ...pick(TEST_POOL_C, 1),
+    ...pickN(TEST_POOL_A, 3),
+    ...pickN(TEST_POOL_B, 2),
+    ...pickN(TEST_POOL_C, 1),
   ];
-  return selected.sort((a, b) => GUEST_TYPES[a].shopCost - GUEST_TYPES[b].shopCost);
+
+  selected.sort((a, b) => GUEST_TYPES[a].shopCost - GUEST_TYPES[b].shopCost);
+
+  return selected.map((k) => (isSoldOut(k) ? null : k));
 }
 
 /**
  * Returns the cash cost of the next house expansion.
  *
- * Cost formula is `(index + 1) * 2`, capped at 12. The index starts at 0 and
- * increments each time the player expands, so costs are $2, $4, $6, $8, $10,
+ * Cost formula is `index + 2`, capped at 12. The index starts at 0 and
+ * increments each time the player expands, so costs are $2, $3, $4, $5, ...,
  * $12, $12, $12, ...
  *
  * @param {number} houseCostIndex - Number of expansions already purchased.
  * @returns {number} Cash cost of the next expansion.
  * @example
  * HOUSE_EXPANSION_COSTS(0); // => 2
- * HOUSE_EXPANSION_COSTS(5); // => 12
+ * HOUSE_EXPANSION_COSTS(10); // => 12
  */
 export function HOUSE_EXPANSION_COSTS(houseCostIndex) {
-  return Math.min((houseCostIndex + 1) * 2, 12);
+  return Math.min(houseCostIndex + 2, 12);
 }

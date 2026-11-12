@@ -199,19 +199,47 @@ describe("buildTestShop", () => {
   it("works with the default shuffle (no shuffleFn argument)", () => {
     const shop = buildTestShop();
     expect(shop.length).toBe(9);
-    expect(new Set(shop).size).toBe(9);
+  });
+
+  it("excludes sold-out guests and fills remaining slots with null", () => {
+    // identity shuffle picks monkey, driver, securityGuard from pool A — all sold out → 3 nulls
+    const purchasedCounts = { monkey: 4, driver: 4, securityGuard: 4, ticketTaker: 4, hippie: 4 };
+    const shop = buildTestShop(identityShuffle, purchasedCounts);
+    expect(shop).not.toContain("monkey");
+    expect(shop).not.toContain("driver");
+    expect(shop.length).toBe(9);
+    expect(shop.filter((k) => k === null).length).toBe(3);
+  });
+
+  it("null appears in the sold-out guest's cost position, not at the end", () => {
+    // identity shuffle picks monkey first from pool A (cost $4)
+    // monkey is sold out → that slot should be null at the $4 position
+    // alien ($40) must still appear last, not displaced
+    const purchasedCounts = { monkey: 4 };
+    const shop = buildTestShop(identityShuffle, purchasedCounts);
+    // null should exist
+    expect(shop).toContain(null);
+    // alien must be last (cost $40 > null's $4 position)
+    expect(shop[shop.length - 1]).toBe("alien");
+    // null must not be last
+    expect(shop.indexOf(null)).toBeLessThan(shop.length - 1);
+  });
+
+  it("marks always-slot as null when sold out", () => {
+    const purchasedCounts = { oldFriend: 4 };
+    const shop = buildTestShop(identityShuffle, purchasedCounts);
+    expect(shop).not.toContain("oldFriend");
+    expect(shop.filter((k) => k === null).length).toBeGreaterThanOrEqual(1);
   });
 });
 
 describe("HOUSE_EXPANSION_COSTS", () => {
-  it("starts at $2 and increases by $2 per step up to $12", () => {
+  it("starts at $2 and increases by $1 per step up to $12", () => {
     expect(HOUSE_EXPANSION_COSTS(0)).toBe(2);
-    expect(HOUSE_EXPANSION_COSTS(1)).toBe(4);
-    expect(HOUSE_EXPANSION_COSTS(2)).toBe(6);
-    expect(HOUSE_EXPANSION_COSTS(3)).toBe(8);
-    expect(HOUSE_EXPANSION_COSTS(4)).toBe(10);
-    expect(HOUSE_EXPANSION_COSTS(5)).toBe(12);
-    expect(HOUSE_EXPANSION_COSTS(6)).toBe(12);
+    expect(HOUSE_EXPANSION_COSTS(1)).toBe(3);
+    expect(HOUSE_EXPANSION_COSTS(2)).toBe(4);
+    expect(HOUSE_EXPANSION_COSTS(10)).toBe(12);
+    expect(HOUSE_EXPANSION_COSTS(11)).toBe(12);
     expect(HOUSE_EXPANSION_COSTS(100)).toBe(12);
   });
 });

@@ -211,6 +211,20 @@ describe("Shop", () => {
     expect(cb).toHaveBeenCalled();
   });
 
+  it("renders Sold Out tile for null entries in shopGuests", () => {
+    render(
+      <Shop
+        state={baseState()}
+        onBuy={() => {}}
+        onExpand={() => {}}
+        onNext={() => {}}
+        shopGuests={[null, "oldFriend"]}
+      />,
+    );
+    expect(screen.getByRole("button", { name: /Sold Out/ })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Sold Out/ }).disabled).toBe(true);
+  });
+
   it("applies focused class to guest tile at matching focusedIndex", () => {
     const { container } = render(
       <Shop

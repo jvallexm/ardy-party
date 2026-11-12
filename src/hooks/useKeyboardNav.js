@@ -31,6 +31,10 @@ const COLS = 9;
  * @param {function} opts.handleEndParty - Callback to end the current party early.
  * @param {function} opts.handleDoor - Callback to invite the next rolodex guest via the door.
  * @param {function} opts.handleGuestClick - Callback invoked with a guest object when activated.
+ * @param {number} opts.rolodexCursor - Index of the focused guest inside the rolodex modal.
+ * @param {function} opts.setRolodexCursor - Rolodex cursor setter.
+ * @param {Array} opts.rolodexGuests - Sorted guest array shown in the rolodex modal (may be filtered).
+ * @param {function} [opts.handleRolodexPick] - Called with a guest object when Space is pressed on a rolodex guest; omit for view-only mode.
  */
 export default function useKeyboardNav({
   state,
@@ -43,6 +47,10 @@ export default function useKeyboardNav({
   setShopCursor,
   rolodexOpen,
   setRolodexOpen,
+  rolodexCursor,
+  setRolodexCursor,
+  rolodexGuests,
+  handleRolodexPick,
   handleConfirmSummary,
   handleBlame,
   handleBuy,
@@ -57,10 +65,31 @@ export default function useKeyboardNav({
       if (e.key.startsWith("Arrow")) e.preventDefault();
 
       if (rolodexOpen) {
-        if (e.key === "Escape" || e.key === " ") {
+        if (e.key === "Escape") {
           e.preventDefault();
           setRolodexOpen(false);
+          return;
         }
+        if (e.key === " " || e.key === "Enter") {
+          e.preventDefault();
+          if (handleRolodexPick && rolodexCursor >= 0 && rolodexGuests[rolodexCursor]) {
+            handleRolodexPick(rolodexGuests[rolodexCursor]);
+          } else {
+            setRolodexOpen(false);
+          }
+          return;
+        }
+        const max = rolodexGuests.length - 1;
+        let next = rolodexCursor;
+        if (e.key === "d" || e.key === "D" || e.key === "ArrowRight")
+          next = Math.min(max, rolodexCursor + 1);
+        else if (e.key === "a" || e.key === "A" || e.key === "ArrowLeft")
+          next = Math.max(0, rolodexCursor - 1);
+        else if (e.key === "s" || e.key === "S" || e.key === "ArrowDown")
+          next = Math.min(max, rolodexCursor + COLS);
+        else if (e.key === "w" || e.key === "W" || e.key === "ArrowUp")
+          next = Math.max(0, rolodexCursor - COLS);
+        if (next !== rolodexCursor) setRolodexCursor(next);
         return;
       }
 
@@ -116,9 +145,10 @@ export default function useKeyboardNav({
           next = Math.min(totalItems - 1, shopCursor + COLS);
         else if (e.key === " ") {
           e.preventDefault();
-          if (shopCursor < shopGuests.length)
-            handleBuy(shopGuests[shopCursor]);
-          else if (shopCursor === shopGuests.length) handleExpand();
+          if (shopCursor < shopGuests.length) {
+            const key = shopGuests[shopCursor];
+            if (key !== null) handleBuy(key);
+          } else if (shopCursor === shopGuests.length) handleExpand();
           else handleNext();
           return;
         }
@@ -200,5 +230,5 @@ export default function useKeyboardNav({
 
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [state, cursor, rolodexOpen, blameCursor, shopCursor]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [state, cursor, rolodexOpen, rolodexCursor, rolodexGuests, blameCursor, shopCursor]); // eslint-disable-line react-hooks/exhaustive-deps
 }

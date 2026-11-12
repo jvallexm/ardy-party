@@ -90,6 +90,17 @@ describe("App - basic flow", () => {
     // No crash; house still has the old friend
     expect(screen.getAllByText("🧑").length).toBeGreaterThan(0);
   });
+
+  it("renders win screen when phase is won", () => {
+    const aliens = [
+      { id: "a1", type: "alien", abilityUsed: false, order: 0 },
+      { id: "a2", type: "alien", abilityUsed: false, order: 1 },
+      { id: "a3", type: "alien", abilityUsed: false, order: 2 },
+      { id: "a4", type: "alien", abilityUsed: false, order: 3 },
+    ];
+    render(<App initialState={freshState({ phase: "won", house: aliens })} />);
+    expect(screen.getByText(/4-star party achieved/)).toBeTruthy();
+  });
 });
 
 describe("App - ability and blame integration", () => {
@@ -176,17 +187,18 @@ describe("App - ability and blame integration", () => {
     expect(screen.queryByText(/Peek/)).toBeNull();
   });
 
-  it("dog ability with boot removes guest from rolodex", () => {
+  it("dog ability with boot bans guest for party but keeps them in rolodex", () => {
     const state = freshState({
       house: [{ id: "d1", type: "dog", abilityUsed: false }],
-      rolodex: [{ id: "r1", type: "wildBuddy", abilityUsed: false }],
+      rolodex: [{ id: "r1", type: "wildBuddy", abilityUsed: false, order: 0 }],
       houseCapacity: 5,
+      bannedThisParty: [],
     });
     render(<App initialState={state} />);
     const dogTile = screen.getByText("🐶").closest("button");
     fireEvent.click(dogTile);
     fireEvent.click(screen.getByRole("button", { name: /Boot/ }));
     fireEvent.click(screen.getByRole("button", { name: /Rolodex/ }));
-    expect(screen.getByText(/1 guest/i)).toBeTruthy(); // dog still in house
+    expect(screen.getByText(/2 guests/i)).toBeTruthy(); // dog in house + wildBuddy still in rolodex
   });
 });

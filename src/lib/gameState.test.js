@@ -551,6 +551,45 @@ describe("activateAbility", () => {
     expect(result.phase).toBe("summary");
   });
 
+  it("transitions to won phase when 4th alien enters the house", () => {
+    const base = createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a });
+    const aliens = [
+      { id: "a1", type: "alien", abilityUsed: false, order: 0 },
+      { id: "a2", type: "alien", abilityUsed: false, order: 1 },
+      { id: "a3", type: "alien", abilityUsed: false, order: 2 },
+      { id: "a4", type: "alien", abilityUsed: false, order: 3 },
+    ];
+    const state = {
+      ...base,
+      house: aliens.slice(0, 3),
+      rolodex: [aliens[3]],
+      houseCapacity: 10,
+    };
+    const result = addGuestToParty(state, "a4");
+    expect(result.phase).toBe("won");
+    expect(result.house).toHaveLength(4);
+  });
+
+  it("4th alien via autoInvite also triggers won", () => {
+    const base = createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a });
+    const aliens = [
+      { id: "a1", type: "alien", abilityUsed: false, order: 0 },
+      { id: "a2", type: "alien", abilityUsed: false, order: 1 },
+      { id: "a3", type: "alien", abilityUsed: false, order: 2 },
+      { id: "a4", type: "alien", abilityUsed: false, order: 3 },
+    ];
+    const mrPop = { id: "mp1", type: "mrPopular", abilityUsed: false, order: 4 };
+    const state = {
+      ...base,
+      house: aliens.slice(0, 3),
+      rolodex: [mrPop, aliens[3]],
+      houseCapacity: 10,
+      bannedThisParty: [],
+    };
+    const result = addGuestToParty(state, "mp1");
+    expect(result.phase).toBe("won");
+  });
+
   it("dog sets dogRevealGuestId to next rolodex id and phase", () => {
     const base = createInitialState({
       idGen: makeIdGen(),
@@ -699,10 +738,28 @@ describe("kickGuest", () => {
     const result = kickGuest(state, "g1", "t1");
     expect(result.trouble).toBe(2);
   });
+
+  it("returns kicked guest to rolodex so they come back next party", () => {
+    const base = createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a });
+    const guard = { id: "g1", type: "securityGuard", abilityUsed: false };
+    const target = { id: "t1", type: "wildBuddy", abilityUsed: false };
+    const state = { ...base, house: [guard, target], rolodex: [], kickMode: { kickerId: "g1" } };
+    const result = kickGuest(state, "g1", "t1");
+    expect(result.rolodex.find((g) => g.id === "t1")).toBeDefined();
+    expect(result.bannedThisParty).toContain("t1");
+  });
+
+  it("does not modify rolodex when target is not found in house", () => {
+    const base = createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a });
+    const guard = { id: "g1", type: "securityGuard", abilityUsed: false };
+    const state = { ...base, house: [guard], rolodex: [], kickMode: { kickerId: "g1" } };
+    const result = kickGuest(state, "g1", "unknown-id");
+    expect(result.rolodex).toEqual([]);
+  });
 });
 
 describe("confirmDogReveal", () => {
-  it("boots the revealed guest from rolodex and resets state", () => {
+  it("boot bans the revealed guest for this party but keeps them in rolodex", () => {
     const base = createInitialState({
       idGen: makeIdGen(),
       shuffleFn: (a) => a,
@@ -715,9 +772,11 @@ describe("confirmDogReveal", () => {
       rolodex: [booted],
       dogRevealGuestId: "r1",
       phase: "dogReveal",
+      bannedThisParty: [],
     };
     const result = confirmDogReveal(state, "boot");
-    expect(result.rolodex.find((g) => g.id === "r1")).toBeUndefined();
+    expect(result.rolodex.find((g) => g.id === "r1")).toBeDefined();
+    expect(result.bannedThisParty).toContain("r1");
     expect(result.dogRevealGuestId).toBeNull();
     expect(result.phase).toBe("party");
   });
@@ -854,7 +913,7 @@ describe("expandHouse", () => {
 });
 
 describe("startNextParty", () => {
-  it("resets trouble, ability flags, keeps bannedThisParty, phase=party", () => {
+  it("resets trouble, ability flags, clears bannedThisParty, phase=party", () => {
     const base = createInitialState({
       idGen: makeIdGen(),
       shuffleFn: (a) => a,
@@ -871,7 +930,7 @@ describe("startNextParty", () => {
     expect(next.trouble).toBe(0);
     expect(next.phase).toBe("party");
     expect(next.rolodex[0].abilityUsed).toBe(false);
-    expect(next.bannedThisParty).toEqual(["banned-id"]);
+    expect(next.bannedThisParty).toEqual([]);
   });
 
   it("shuffles the rolodex using the provided shuffleFn", () => {

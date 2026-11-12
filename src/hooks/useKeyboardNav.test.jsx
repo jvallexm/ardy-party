@@ -72,6 +72,84 @@ describe("App - keyboard navigation", () => {
     expect(screen.getByText(/10 guests/i)).toBeTruthy();
   });
 
+  // --- rolodex keyboard navigation ---
+
+  function driverState(rolodex = []) {
+    return freshState({
+      house: [{ id: "dv1", type: "driver", abilityUsed: false }],
+      rolodex: rolodex.length
+        ? rolodex
+        : [
+            { id: "r1", type: "oldFriend", abilityUsed: false, order: 0 },
+            { id: "r2", type: "richPal", abilityUsed: false, order: 1 },
+          ],
+      houseCapacity: 5,
+      bannedThisParty: [],
+    });
+  }
+
+  it("Space immediately selects first guest in driver mode (cursor starts at 0)", () => {
+    render(
+      <App initialState={driverState()} initialCursor={{ row: 0, col: 2 }} />,
+    );
+    press(" "); // activate driver → rolodex opens
+    press(" "); // select guest at cursor 0 (oldFriend)
+    expect(screen.queryByText(/Pick a Guest/)).toBeNull();
+    expect(screen.getByText("🧑")).toBeTruthy(); // oldFriend in house
+  });
+
+  it("D moves rolodex cursor right; Space selects that guest in driver mode", () => {
+    render(
+      <App initialState={driverState()} initialCursor={{ row: 0, col: 2 }} />,
+    );
+    press(" "); // activate driver
+    press("d"); // move cursor to index 1 (richPal)
+    press(" "); // select richPal
+    expect(screen.queryByText(/Pick a Guest/)).toBeNull();
+    expect(screen.getByText("💰")).toBeTruthy(); // richPal in house
+  });
+
+  it("A at left edge of rolodex does not go below 0; Space still selects first guest", () => {
+    render(
+      <App initialState={driverState()} initialCursor={{ row: 0, col: 2 }} />,
+    );
+    press(" "); // activate driver
+    press("a"); // try left at 0 → clamps at 0
+    press(" "); // selects first guest (oldFriend)
+    expect(screen.getByText("🧑")).toBeTruthy();
+  });
+
+  it("ArrowRight/ArrowLeft navigate rolodex cursor", () => {
+    render(
+      <App initialState={driverState()} initialCursor={{ row: 0, col: 2 }} />,
+    );
+    press(" "); // activate driver
+    press("ArrowRight"); // move to index 1
+    press("ArrowLeft"); // back to index 0
+    press(" "); // select oldFriend
+    expect(screen.getByText("🧑")).toBeTruthy();
+  });
+
+  it("S/W navigate rolodex cursor down and up by row", () => {
+    const rolodex = Array.from({ length: 11 }, (_, i) => ({
+      id: `r${i}`,
+      type: "oldFriend",
+      abilityUsed: false,
+      order: i,
+    }));
+    render(
+      <App
+        initialState={driverState(rolodex)}
+        initialCursor={{ row: 0, col: 2 }}
+      />,
+    );
+    press(" "); // activate driver
+    press("s"); // move cursor down by COLS (9) → index 9
+    press("w"); // back to index 0
+    press(" "); // select first guest
+    expect(screen.queryByText(/Pick a Guest/)).toBeNull();
+  });
+
   it("D moves cursor right; Space on guest tile triggers ability", () => {
     const state = freshState({
       house: [{ id: "d1", type: "dog", abilityUsed: false }],
@@ -243,30 +321,32 @@ describe("App - keyboard navigation", () => {
 
   // --- dogReveal phase ---
 
-  it("A boots peeked guest in dogReveal phase", () => {
+  it("A boots peeked guest in dogReveal phase (bans for party, stays in rolodex)", () => {
     const state = freshState({
       house: [{ id: "d1", type: "dog", abilityUsed: false }],
-      rolodex: [{ id: "r1", type: "wildBuddy", abilityUsed: false }],
+      rolodex: [{ id: "r1", type: "wildBuddy", abilityUsed: false, order: 0 }],
       houseCapacity: 5,
+      bannedThisParty: [],
     });
     render(<App initialState={state} />);
     fireEvent.click(screen.getByText("🐶").closest("button"));
     press("a"); // boot
     fireEvent.click(screen.getByRole("button", { name: /Rolodex/ }));
-    expect(screen.getByText(/1 guest/i)).toBeTruthy(); // dog still in house
+    expect(screen.getByText(/2 guests/i)).toBeTruthy(); // wildBuddy still in rolodex + dog in house
   });
 
-  it("ArrowLeft boots peeked guest in dogReveal phase", () => {
+  it("ArrowLeft boots peeked guest in dogReveal phase (bans for party, stays in rolodex)", () => {
     const state = freshState({
       house: [{ id: "d1", type: "dog", abilityUsed: false }],
-      rolodex: [{ id: "r1", type: "wildBuddy", abilityUsed: false }],
+      rolodex: [{ id: "r1", type: "wildBuddy", abilityUsed: false, order: 0 }],
       houseCapacity: 5,
+      bannedThisParty: [],
     });
     render(<App initialState={state} />);
     fireEvent.click(screen.getByText("🐶").closest("button"));
     press("ArrowLeft");
     fireEvent.click(screen.getByRole("button", { name: /Rolodex/ }));
-    expect(screen.getByText(/1 guest/i)).toBeTruthy(); // dog still in house
+    expect(screen.getByText(/2 guests/i)).toBeTruthy(); // wildBuddy still in rolodex + dog in house
   });
 
   it("ArrowRight keeps peeked guest in dogReveal phase", () => {
@@ -522,6 +602,27 @@ describe("App - keyboard navigation", () => {
     render(<App initialState={shopState({ popularity: 100 })} />);
     press(" ");
     expect(screen.getByText(/Rolodex: 1/)).toBeTruthy();
+  });
+
+  it("Space on a null (sold out) shop slot does nothing", () => {
+    const s = freshState({
+      phase: "shop",
+      nightsLeft: 10,
+      cash: 0,
+      popularity: 100,
+      rolodex: [],
+      houseCapacity: 5,
+      houseCostIndex: 0,
+      purchasedCounts: {},
+      bannedThisParty: [],
+      house: [],
+      testShop: [null, "oldFriend"],
+      mode: "test",
+    });
+    render(<App initialState={s} />);
+    press(" "); // cursor at index 0 = null slot
+    // rolodex stays empty (no buy happened)
+    expect(screen.getByText(/Rolodex: 0/)).toBeTruthy();
   });
 
   it("Space at house tile expands house", () => {

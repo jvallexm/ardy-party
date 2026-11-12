@@ -52,6 +52,23 @@ export default function Shop({
         </div>
         <div className="shop-grid">
           {shopGuests.map((key, i) => {
+            if (key === null) {
+              return (
+                <div key={`sold-out-${i}`} className="shop-item">
+                  <button
+                    type="button"
+                    aria-label="Sold Out"
+                    className={`shop-tile${focusedIndex === i ? " focused" : ""}`}
+                    disabled
+                  >
+                    🚫
+                  </button>
+                  <div className="shop-tile-info">
+                    <div className="shop-tile-name">Sold Out</div>
+                  </div>
+                </div>
+              );
+            }
             const def = GUEST_TYPES[key];
             const purchased = state.purchasedCounts[key] || 0;
             const isUnlimited = def.maxPurchase === Infinity;

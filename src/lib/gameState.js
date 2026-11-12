@@ -153,6 +153,10 @@ export function addGuestToParty(state, guestId) {
   const nextHouse = [...state.house, guest];
   let next = { ...state, rolodex: nextRolodex, house: nextHouse };
 
+  if (countStars(next.house) >= 4) {
+    return { ...next, phase: "won" };
+  }
+
   if (def.trouble) {
     next = { ...next, trouble: next.trouble + 1 };
   }
@@ -174,6 +178,9 @@ export function addGuestToParty(state, guestId) {
       const afterRolodex = next.rolodex.filter((g) => g.id !== nextGuest.id);
       const afterHouse = [...next.house, nextGuest];
       next = { ...next, rolodex: afterRolodex, house: afterHouse };
+      if (countStars(next.house) >= 4) {
+        return { ...next, phase: "won" };
+      }
       if (nextDef.trouble) {
         next = { ...next, trouble: next.trouble + 1 };
       }
@@ -234,7 +241,7 @@ export function confirmSummary(state) {
     nightsLeft: state.nightsLeft - 1,
     phase: "shop",
     rolodex: [...state.rolodex, ...state.house],
-    testShop: state.mode === "test" ? buildTestShop() : null,
+    testShop: state.mode === "test" ? buildTestShop(undefined, state.purchasedCounts) : null,
   };
 }
 
@@ -260,7 +267,7 @@ export function blameGuest(state, guestId) {
     blameContext: null,
     driverMode: null,
     rolodex: [...state.rolodex, ...nextHouse],
-    testShop: state.mode === "test" ? buildTestShop() : null,
+    testShop: state.mode === "test" ? buildTestShop(undefined, state.purchasedCounts) : null,
   };
 }
 
@@ -316,7 +323,8 @@ export function activateAbility(state, guestId) {
 }
 
 /**
- * Executes a kick: removes the target from the house and bans them for the rest of this party.
+ * Executes a kick: removes the target from the house, returns them to the rolodex,
+ * and bans them for the rest of this party.
  *
  * Also marks the kicker's ability as used and clears kickMode. If the target
  * was a trouble guest their removal decrements the trouble counter by 1.
@@ -336,6 +344,7 @@ export function kickGuest(state, kickerId, targetId) {
   return {
     ...rest,
     house,
+    rolodex: target ? [...state.rolodex, target] : state.rolodex,
     bannedThisParty: [...state.bannedThisParty, targetId],
     trouble: targetIsTrouble ? Math.max(0, state.trouble - 1) : state.trouble,
   };
@@ -347,18 +356,18 @@ export function kickGuest(state, kickerId, targetId) {
  * Always clears dogRevealGuestId and returns to the 'party' phase regardless of choice.
  *
  * @param {object} state - Current game state; must be in 'dogReveal' phase.
- * @param {'boot' | 'keep'} choice - 'boot' removes the guest from the rolodex permanently; 'keep' leaves them in place.
+ * @param {'boot' | 'keep'} choice - 'boot' bans the guest for the rest of this party (they return next party); 'keep' leaves them in place.
  * @returns {object} Updated state with phase set back to 'party'.
  */
 export function confirmDogReveal(state, choice) {
   const id = state.dogRevealGuestId;
-  const rolodex =
+  const bannedThisParty =
     choice === "boot"
-      ? state.rolodex.filter((g) => g.id !== id)
-      : state.rolodex;
+      ? [...state.bannedThisParty, id]
+      : state.bannedThisParty;
   return {
     ...state,
-    rolodex,
+    bannedThisParty,
     dogRevealGuestId: null,
     phase: "party",
   };
@@ -416,9 +425,9 @@ export function expandHouse(state) {
 /**
  * Resets the house and rolodex for the next party night.
  *
- * Clears the house array, resets trouble to 0, and returns all rolodex guests
- * to the deck with their abilityUsed flags reset before shuffling. bannedThisParty
- * is not cleared here — it persists from the blameGuest call that preceded the shop.
+ * Clears the house array, resets trouble to 0, returns all rolodex guests
+ * to the deck with their abilityUsed flags reset before shuffling, and clears
+ * bannedThisParty so kicked and dog-booted guests return for the new party.
  *
  * @param {object} state - Current game state; must be in 'shop' phase.
  * @param {function} [shuffleFn] - Array shuffle function; defaults to Fisher-Yates.
@@ -432,7 +441,7 @@ export function startNextParty(state, shuffleFn = shuffleArray) {
     trouble: 0,
     house: [],
     rolodex: shuffleFn(reset),
-    // bannedThisParty persists one party (set by blameGuest before shop)
+    bannedThisParty: [],
   };
 }
 
