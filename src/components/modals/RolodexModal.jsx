@@ -1,5 +1,5 @@
 import React from "react";
-import GuestGrid from "./GuestGrid.jsx";
+import GuestGrid from "../GuestGrid.jsx";
 
 const byOrder = (a, b) => a.order - b.order;
 

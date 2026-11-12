@@ -1,6 +1,6 @@
 import React from "react";
-import GuestGrid from "./GuestGrid.jsx";
-import { BLAME_REASONS } from "../lib/blameReasons.js";
+import GuestGrid from "../GuestGrid.jsx";
+import { BLAME_REASONS } from "../../lib/blameReasons.js";
 
 /**
  * Modal overlay that prompts the player to select a guest to eject.

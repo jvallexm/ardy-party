@@ -3,12 +3,12 @@ import usePhaseReset from "./hooks/usePhaseReset.js";
 import useKeyboardNav from "./hooks/useKeyboardNav.js";
 import HUD from "./components/HUD.jsx";
 import House from "./components/House.jsx";
-import RolodexModal from "./components/RolodexModal.jsx";
-import SummaryModal from "./components/SummaryModal.jsx";
+import RolodexModal from "./components/modals/RolodexModal.jsx";
+import SummaryModal from "./components/modals/SummaryModal.jsx";
 import Shop from "./components/Shop.jsx";
-import BlamePicker from "./components/BlamePicker.jsx";
-import PeekNextGuest from "./components/PeekNextGuest.jsx";
-import WinScreen from "./components/WinScreen.jsx";
+import BlamePicker from "./components/modals/BlamePicker.jsx";
+import PeekNextGuest from "./components/modals/PeekNextGuest.jsx";
+import WinScreen from "./components/modals/WinScreen.jsx";
 import { GUEST_TYPES, SHOP_GUESTS } from "./lib/guests.js";
 import {
   createInitialState,

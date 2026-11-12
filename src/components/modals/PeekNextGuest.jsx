@@ -1,5 +1,5 @@
 import React from "react";
-import GuestTile from "./GuestTile.jsx";
+import GuestTile from "../GuestTile.jsx";
 
 /**
  * Inline panel that lets the player preview the next rolodex guest and decide their fate.

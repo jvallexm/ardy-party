@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import App from "./App.jsx";
-import ModeSelect from "./components/ModeSelect.jsx";
+import ModeSelect from "./components/modals/ModeSelect.jsx";
 import { createInitialState } from "./lib/gameState.js";
 
 /**

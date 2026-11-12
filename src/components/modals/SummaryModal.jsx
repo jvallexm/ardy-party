@@ -1,7 +1,7 @@
 import React from "react";
-import { GUEST_TYPES } from "../lib/guests.js";
-import { scoreHouse } from "../lib/gameState.js";
-import { formatBonus as fmt } from "../lib/display.js";
+import { GUEST_TYPES } from "../../lib/guests.js";
+import { scoreHouse } from "../../lib/gameState.js";
+import { formatBonus as fmt } from "../../lib/display.js";
 
 /**
  * Modal overlay showing per-guest and total scoring for the night just ended.
