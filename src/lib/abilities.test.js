@@ -75,6 +75,53 @@ describe("activateAbility", () => {
     expect(result.kickMode).toEqual({ kickerId: "g1" });
   });
 
+  it("privateEye sets driverMode and marks ability used", () => {
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+    });
+    const eye = { id: "pe1", type: "privateEye", abilityUsed: false };
+    const state = { ...base, house: [eye], rolodex: [] };
+    const result = activateAbility(state, eye.id);
+    expect(result.house[0].abilityUsed).toBe(true);
+    expect(result.driverMode).toEqual({ driverId: "pe1" });
+  });
+
+  it("spy sets dogRevealGuestId and phase to dogReveal", () => {
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+    });
+    const spy = { id: "s1", type: "spy", abilityUsed: false };
+    const next = { id: "n1", type: "oldFriend", abilityUsed: false };
+    const state = { ...base, house: [spy], rolodex: [next] };
+    const result = activateAbility(state, spy.id);
+    expect(result.dogRevealGuestId).toBe("n1");
+    expect(result.phase).toBe("dogReveal");
+    expect(result.house[0].abilityUsed).toBe(true);
+  });
+
+  it("spy does nothing when rolodex is empty", () => {
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+    });
+    const spy = { id: "s1", type: "spy", abilityUsed: false };
+    const state = { ...base, house: [spy], rolodex: [] };
+    expect(activateAbility(state, spy.id)).toBe(state);
+  });
+
+  it("wrestler returns kickMode", () => {
+    const base = createInitialState({
+      idGen: makeIdGen(),
+      shuffleFn: (a) => a,
+    });
+    const wrestler = { id: "w1", type: "wrestler", abilityUsed: false };
+    const state = { ...base, house: [wrestler] };
+    const result = activateAbility(state, wrestler.id);
+    expect(result.kickMode).toEqual({ kickerId: "w1" });
+  });
+
   it("is a no-op if the guest has no ability", () => {
     const base = createInitialState({
       idGen: makeIdGen(),

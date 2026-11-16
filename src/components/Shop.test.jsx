@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import Shop from "./Shop.jsx";
-import { SHOP_GUESTS, GUEST_TYPES } from "../lib/guests.js";
+import { SHOP_GUESTS, GUEST_TYPES } from "../lib/guests/index.js";
 
 const baseState = (overrides = {}) => ({
   nightsLeft: 20,

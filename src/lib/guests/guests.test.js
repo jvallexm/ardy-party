@@ -406,6 +406,14 @@ describe("buildTestShop scenario 2", () => {
       }
     }
   });
+
+  it("marks always-slot as null when sold out in s2", () => {
+    const purchasedCounts = { oldFriend: 4 };
+    const shop = buildTestShop(identityShuffle, purchasedCounts, "s2");
+    expect(shop).not.toContain("oldFriend");
+    expect(shop.some((k) => k === null)).toBe(true);
+    expect(shop).toContain("richPal");
+  });
 });
 
 describe("HOUSE_EXPANSION_COSTS", () => {

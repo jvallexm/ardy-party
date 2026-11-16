@@ -10,7 +10,7 @@ import BlamePicker from "./components/modals/BlamePicker.jsx";
 import PeekNextGuest from "./components/modals/PeekNextGuest.jsx";
 import WinScreen from "./components/modals/WinScreen.jsx";
 import GameOver from "./components/modals/GameOver.jsx";
-import { GUEST_TYPES } from "./lib/guests.js";
+import { GUEST_TYPES } from "./lib/guests/index.js";
 import {
   SCENARIO_1_SHOP_GUESTS,
   SCENARIO_2_SHOP_GUESTS,

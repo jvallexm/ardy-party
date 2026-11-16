@@ -191,6 +191,15 @@ describe("App - keyboard navigation", () => {
     expect(screen.queryByText(/Night Results/)).toBeNull();
   });
 
+  it("confirms summary to gameOver when nightsLeft reaches 0", () => {
+    const state = freshState({ nightsLeft: 1 });
+    render(<App initialState={state} />);
+    press("w");
+    press(" "); // go to summary
+    press(" "); // confirm → nightsLeft becomes 0 → gameOver phase
+    expect(screen.getByText(/Game Over/)).toBeTruthy();
+  });
+
   it("Enter in summary phase confirms summary", () => {
     render(<App />);
     press("w");
@@ -241,6 +250,43 @@ describe("App - keyboard navigation", () => {
     render(<App />);
     press("x");
     expect(screen.getByRole("button", { name: /End Party/ })).toBeTruthy();
+  });
+
+  it("Escape clears kickMode", () => {
+    const guard = { id: "g1", type: "securityGuard", abilityUsed: false };
+    const target = { id: "t1", type: "wildBuddy", abilityUsed: false };
+    const state = freshState({
+      house: [guard, target],
+      houseCapacity: 5,
+      kickMode: { kickerId: "g1" },
+    });
+    render(<App initialState={state} />);
+    expect(screen.getByText(/Click a guest to kick/)).toBeTruthy();
+    press("Escape");
+    expect(screen.queryByText(/Click a guest to kick/)).toBeNull();
+  });
+
+  it("Escape with no kickMode or driverMode does nothing", () => {
+    render(<App />);
+    press("Escape");
+    expect(screen.getByRole("button", { name: /End Party/ })).toBeTruthy();
+  });
+
+  it("Escape clears driverMode when rolodex is closed", () => {
+    const driver = { id: "dv1", type: "driver", abilityUsed: false };
+    const pal = { id: "r1", type: "oldFriend", abilityUsed: false, order: 0 };
+    const state = freshState({
+      house: [driver],
+      rolodex: [pal],
+      houseCapacity: 5,
+      bannedThisParty: [],
+    });
+    render(<App initialState={state} initialCursor={{ row: 0, col: 2 }} />);
+    press(" "); // activate driver → driverMode set, rolodex opens
+    press("Escape"); // close rolodex (driverMode still active)
+    press("Escape"); // clear driverMode
+    // rolodex should not auto-reopen after driverMode cleared
+    expect(screen.queryByText(/Pick a Guest/)).toBeNull();
   });
 
   it("ArrowLeft moves cursor left", () => {
@@ -548,6 +594,11 @@ describe("App - keyboard navigation", () => {
     render(<App initialState={shopState()} />);
     press("s");
     press("w");
+    expect(screen.getByText(/10 Nights remaining/)).toBeTruthy();
+  });
+
+  it("renders shop in scenario 2", () => {
+    render(<App initialState={shopState({ scenario: "s2" })} />);
     expect(screen.getByText(/10 Nights remaining/)).toBeTruthy();
   });
 

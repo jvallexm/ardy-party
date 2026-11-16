@@ -102,4 +102,16 @@ describe("GuestTile", () => {
     fireEvent.click(btn);
     expect(onClick).not.toHaveBeenCalled();
   });
+
+  it("shows climberCount as pop badge when climberCount > 0", () => {
+    const guest = { id: "a", type: "climber", abilityUsed: false, climberCount: 3 };
+    const { container } = render(<GuestTile guest={guest} />);
+    expect(container.querySelector(".tile-pop").textContent).toBe("+3");
+  });
+
+  it("shows no pop badge for climber with no count yet", () => {
+    const guest = { id: "a", type: "climber", abilityUsed: false };
+    const { container } = render(<GuestTile guest={guest} />);
+    expect(container.querySelector(".tile-pop")).toBeNull();
+  });
 });

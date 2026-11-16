@@ -3,7 +3,7 @@ import {
   SHOP_GUESTS,
   GUEST_TYPES,
   HOUSE_EXPANSION_COSTS,
-} from "../lib/guests.js";
+} from "../lib/guests/index.js";
 import TileVisuals from "./TileVisuals.jsx";
 
 const MAX_CAPACITY = 34;

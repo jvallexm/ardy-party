@@ -12,7 +12,7 @@ import {
   scoreHouse,
   driverPickGuest,
 } from "./gameState.js";
-import { GUEST_TYPES } from "./guests.js";
+import { GUEST_TYPES } from "./guests/index.js";
 
 // Deterministic id generator for tests
 function makeIdGen() {
@@ -201,6 +201,38 @@ describe("addGuestToParty", () => {
     };
     const next = addGuestToParty(s, mrPop.id);
     expect(next.house.map((g) => g.id)).toEqual([mrPop.id]);
+    expect(next.phase).toBe("party");
+  });
+
+  it("mermaid auto-invites next unbanned rolodex guest on enter", () => {
+    const idGen = makeIdGen();
+    const mermaid = { id: idGen(), type: "mermaid", abilityUsed: false };
+    const friend = { id: idGen(), type: "oldFriend", abilityUsed: false };
+    const s = {
+      ...createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a }),
+      house: [],
+      rolodex: [mermaid, friend],
+      houseCapacity: 5,
+      bannedThisParty: [],
+    };
+    const next = addGuestToParty(s, mermaid.id);
+    expect(next.house.map((g) => g.id)).toContain(mermaid.id);
+    expect(next.house.map((g) => g.id)).toContain(friend.id);
+    expect(next.phase).toBe("party");
+  });
+
+  it("mermaid skips auto-invite when rolodex is empty", () => {
+    const idGen = makeIdGen();
+    const mermaid = { id: idGen(), type: "mermaid", abilityUsed: false };
+    const s = {
+      ...createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a }),
+      house: [],
+      rolodex: [mermaid],
+      houseCapacity: 5,
+      bannedThisParty: [],
+    };
+    const next = addGuestToParty(s, mermaid.id);
+    expect(next.house.map((g) => g.id)).toEqual([mermaid.id]);
     expect(next.phase).toBe("party");
   });
 
@@ -424,6 +456,23 @@ describe("addGuestToParty", () => {
     };
     const next = addGuestToParty(s, climber.id);
     expect(next.house[0].climberCount).toBe(1);
+  });
+
+  it("climber only increments its own count when other guests are in the house", () => {
+    const idGen = makeIdGen();
+    const climber = { id: idGen(), type: "climber", abilityUsed: false, order: 0 };
+    const friend = { id: idGen(), type: "oldFriend", abilityUsed: false };
+    const s = {
+      ...createInitialState({ idGen: makeIdGen(), shuffleFn: (a) => a }),
+      house: [friend],
+      rolodex: [climber],
+      houseCapacity: 5,
+    };
+    const next = addGuestToParty(s, climber.id);
+    const climberInHouse = next.house.find((g) => g.id === climber.id);
+    const friendInHouse = next.house.find((g) => g.id === friend.id);
+    expect(climberInHouse.climberCount).toBe(1);
+    expect(friendInHouse.climberCount).toBeUndefined();
   });
 
   it("climber individual count does not exceed 9", () => {

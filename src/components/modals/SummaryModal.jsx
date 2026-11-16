@@ -1,5 +1,5 @@
 import React from "react";
-import { GUEST_TYPES } from "../../lib/guests.js";
+import { GUEST_TYPES } from "../../lib/guests/index.js";
 import { scoreHouse } from "../../lib/gameState.js";
 import { formatBonus as fmt } from "../../lib/display.js";
 

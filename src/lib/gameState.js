@@ -170,9 +170,6 @@ export function addGuestToParty(state, guestId) {
   if (def.onEnter) {
     next = def.onEnter(next, addGuestToParty, guest.id);
     if (next.phase !== "party") return next;
-    if (next.house.length > next.houseCapacity) {
-      return { ...next, phase: "blame", blameContext: "overcapacity" };
-    }
   }
 
   if (shouldAutoEnd(next)) {

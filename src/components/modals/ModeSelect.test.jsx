@@ -115,4 +115,22 @@ describe("ModeSelect — mode selection", () => {
     act(() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "c" })));
     expect(cb).not.toHaveBeenCalled();
   });
+
+  it("pressing an unrecognized key does nothing", () => {
+    const cb = selectScenario("s1");
+    act(() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "z" })));
+    expect(cb).not.toHaveBeenCalled();
+  });
+
+  it("pressing T (uppercase) after selecting scenario 1 calls onSelect with test", () => {
+    const cb = selectScenario("s1");
+    act(() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "T" })));
+    expect(cb).toHaveBeenCalledWith({ scenario: "s1", mode: "test" });
+  });
+
+  it("pressing C (uppercase) after selecting scenario 1 calls onSelect with classic", () => {
+    const cb = selectScenario("s1");
+    act(() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "C" })));
+    expect(cb).toHaveBeenCalledWith({ scenario: "s1", mode: "classic" });
+  });
 });
